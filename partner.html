@@ -2436,13 +2436,20 @@ const defaultOrderAccounting = {
   'GEO-261070': {articles:{used:30,limit:120},crawl:{used:36, limit:100}, sourceSpend:1440, sourceLimit:3000}
 };
 
+function getSkuDefaultQuota(ver) {
+  const base = DEFAULT_VER_DEFS[tenantId] || DEFAULT_VER_DEFS['OEM-001'];
+  return ver === '工具版' ? { ...base.tool } : { ...base.service };
+}
+
 function ensureOrderQuota(o) {
   const isTool = orderVersion(o.package) === '工具版';
+  const ver = isTool ? '工具版' : '服务版';
+  const sku = getSkuDefaultQuota(ver);
   const vd = accGetVerDefaults(tenantId)[isTool ? 'tool' : 'service'];
   const def = defaultOrderAccounting[o.id] || {
-    articles: { used: 0, limit: vd.articles },
-    crawl: { used: 0, limit: vd.crawlLimit },
-    sourceSpend: 0, sourceLimit: vd.sourceLimit
+    articles: { used: 0, limit: Math.min(vd.articles, sku.articles) },
+    crawl: { used: 0, limit: Math.min(vd.crawlLimit, sku.crawlLimit) },
+    sourceSpend: 0, sourceLimit: Math.min(vd.sourceLimit, sku.sourceLimit)
   };
   if (!o.quotas || !o.quotas.crawl || typeof o.quotas.crawl.used !== 'number') {
     const prevArt = o.quotas?.articles || def.articles;
@@ -2455,8 +2462,37 @@ function ensureOrderQuota(o) {
       sourceLimit: prevSrcLim
     };
   }
+  if (!o.quotas.paidBase) {
+    o.quotas.paidBase = {
+      articles: Math.max(sku.articles, Number(o.quotas.articles.limit || 0)),
+      crawl: Math.max(sku.crawlLimit, Number(o.quotas.crawl.limit || 0)),
+      source: Math.max(sku.sourceLimit, Number(o.quotas.sourceLimit || 0))
+    };
+  }
   if (!Array.isArray(o.modules)) o.modules = [...partnerClientModules];
   return o.quotas;
+}
+
+function calcQuotaExpandCost(o, nextArt, nextCrawl, nextSrc) {
+  const q = ensureOrderQuota(o);
+  const ver = orderVersion(o.package);
+  const sku = getSkuDefaultQuota(ver);
+  const rates = accGetHqRates(tenantId);
+  const baseArt = Math.max(sku.articles, Number(q.paidBase?.articles || 0));
+  const baseCrawl = Math.max(sku.crawlLimit, Number(q.paidBase?.crawl || 0));
+  const baseSrc = Math.max(sku.sourceLimit, Number(q.paidBase?.source || 0));
+  const extraArt = Math.max(0, nextArt - baseArt);
+  const extraCrawl = Math.max(0, nextCrawl - baseCrawl);
+  const extraSrc = Math.max(0, nextSrc - baseSrc);
+  const artCost = Number((extraArt * rates.articles).toFixed(2));
+  const crawlCost = Number((extraCrawl * rates.crawl).toFixed(2));
+  const srcCost = Number(extraSrc.toFixed(2));
+  const total = Number((artCost + crawlCost + srcCost).toFixed(2));
+  const items = [];
+  if (extraArt > 0) items.push({ label: '生文额度扩容', prev: `${q.articles.limit} 篇`, base: `${baseArt} 篇`, next: `${nextArt} 篇`, delta: `+${extraArt} 篇`, unit: `¥${rates.articles.toFixed(2)}/篇`, cost: artCost });
+  if (extraCrawl > 0) items.push({ label: '爬虫额度扩容', prev: `${q.crawl.limit} 次`, base: `${baseCrawl} 次`, next: `${nextCrawl} 次`, delta: `+${extraCrawl} 次`, unit: `¥${rates.crawl.toFixed(2)}/次`, cost: crawlCost });
+  if (extraSrc > 0) items.push({ label: '信源额度增配', prev: `¥${Number(q.sourceLimit || 0).toLocaleString('zh-CN')}`, base: `¥${baseSrc.toLocaleString('zh-CN')}`, next: `¥${nextSrc.toLocaleString('zh-CN')}`, delta: `+¥${extraSrc.toLocaleString('zh-CN')}`, unit: '等额增配', cost: srcCost });
+  return { ver, sku, rates, baseArt, baseCrawl, baseSrc, extraArt, extraCrawl, extraSrc, artCost, crawlCost, srcCost, total, items };
 }
 
 function calcOrderCost(o) {
@@ -2528,31 +2564,137 @@ function quotasPage() {
   </section>`;
 }
 
-function openOrderQuotaModal(o) {
+let pendingQuotaCharge = null;
+
+function renderQuotaExpandPreviewHtml(o, nextArt, nextCrawl, nextSrc) {
+  const calc = calcQuotaExpandCost(o, nextArt, nextCrawl, nextSrc);
+  const bal = accGetBalance(tenantId);
+  const enough = bal >= calc.total;
+  if (calc.total <= 0) {
+    return {
+      calc, enough: true,
+      html: `<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;border-radius:10px;background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;font-size:12.5px">
+        <span>✓ 本次调整在默认 SKU（及本单已含扩容）额度内，<b>无需额外扣费</b></span>
+        <b style="font-size:15px">¥0.00</b>
+      </div>`
+    };
+  }
+  return {
+    calc, enough,
+    html: `<div style="padding:12px 14px;border-radius:10px;background:${enough ? '#fffbeb' : '#fff1f2'};border:1px solid ${enough ? '#fde68a' : '#fecdd3'};color:${enough ? '#92400e' : '#9f1239'};font-size:12.5px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px">
+        <b>⚠ 已超出【${esc(calc.ver)}】默认 SKU 额度，向上调增需扣除代理商费用</b>
+        <b style="font-size:17px;color:${enough ? '#b45309' : 'var(--red)'};font-variant-numeric:tabular-nums">需扣 ¥${calc.total.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}</b>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:8px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.72);color:#334155">
+        ${calc.items.map(it => `<div style="display:flex;justify-content:space-between;gap:10px"><span>${esc(it.label)}：超默认上限 <b>${esc(it.delta)}</b>（${esc(it.unit)}）</span><b style="color:#0f172a">¥${it.cost.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}</b></div>`).join('')}
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12px">
+        <span>当前代理商余额：<b>¥${bal.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}</b></span>
+        ${enough
+          ? `<span style="color:#047857;font-weight:650">扣费后余额 ¥${(bal - calc.total).toLocaleString('zh-CN', { minimumFractionDigits: 2 })}（下一步弹出扣费确认）</span>`
+          : `<span style="color:var(--red);font-weight:700">余额不足，请联系商务通过 CRM 充值入账</span>`}
+      </div>
+    </div>`
+  };
+}
+
+function updateOrderQuotaPreview() {
+  const f = $('#quotaEditForm');
+  if (!f) return;
+  const o = data.orders.find(x => x.id === f.dataset.id);
+  if (!o) return;
+  const nextArt = Math.max(0, Number(f.elements.lim_articles?.value || 0));
+  const nextCrawl = Math.max(0, Number(f.elements.lim_crawl?.value || 0));
+  const nextSrc = Math.max(0, Number(f.elements.lim_source?.value || 0));
+  const pv = renderQuotaExpandPreviewHtml(o, nextArt, nextCrawl, nextSrc);
+  const box = $('#quotaExpandPreview');
+  if (box) box.innerHTML = pv.html;
+  const submitBtn = $('#quotaEditSubmitBtn');
+  if (submitBtn) {
+    submitBtn.disabled = !pv.enough;
+    submitBtn.textContent = pv.calc.total > 0
+      ? (pv.enough ? `下一步：确认扣费 ¥${pv.calc.total.toLocaleString('zh-CN', { minimumFractionDigits: 2 })} →` : '余额不足，请通过 CRM 充值')
+      : '保存本单额度';
+  }
+}
+
+function openOrderQuotaModal(o, draft = null) {
   const q = ensureOrderQuota(o);
   const ver = orderVersion(o.package);
-  const vd = accGetVerDefaults(tenantId)[ver === '工具版' ? 'tool' : 'service'];
-  const cLim = typeof q.crawl.limit === 'number' ? q.crawl.limit : vd.crawlLimit;
-  const sLim = typeof q.sourceLimit === 'number' ? q.sourceLimit : vd.sourceLimit;
+  const sku = getSkuDefaultQuota(ver);
+  const curArt = draft ? draft.lim_articles : q.articles.limit;
+  const curCrawl = draft ? draft.lim_crawl : (typeof q.crawl.limit === 'number' ? q.crawl.limit : sku.crawlLimit);
+  const curSrc = draft ? draft.lim_source : (typeof q.sourceLimit === 'number' ? q.sourceLimit : sku.sourceLimit);
+  const pv = renderQuotaExpandPreviewHtml(o, curArt, curCrawl, curSrc);
+  const baseArt = pv.calc.baseArt;
+  const baseCrawl = pv.calc.baseCrawl;
+  const baseSrc = pv.calc.baseSrc;
+  const minSrc = Math.ceil(Number(q.sourceSpend || 0));
   modal('调整订单额度 · ' + o.customer,
     `<form id="quotaEditForm" data-id="${esc(o.id)}">
-      <div class="hq-price-fields" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:14px">
-        <label>生文上限（篇）<small>已用 ${q.articles.used} 篇</small>
-          <input type="number" name="lim_articles" min="${q.articles.used}" max="50000" value="${q.articles.limit}" required>
+      <div class="rate-alert-box" style="margin-bottom:14px">
+        <span style="font-size:15px;line-height:1.2">ⓘ</span>
+        <div><b>默认 SKU 额度规则：</b>【${esc(ver)}】默认 SKU 额度为生文 <b>${sku.articles} 篇</b>、爬虫 <b>${sku.crawlLimit} 次</b>、信源 <b>¥${sku.sourceLimit.toLocaleString('zh-CN')}</b>。免费调额最高仅限默认 SKU（及本单已购扩容）额度；<b>若需继续向上调增，将按单价扣除代理商余额并弹出扣费确认弹窗</b>。</div>
+      </div>
+      <div class="hq-price-fields" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:12px">
+        <label>生文上限（篇）<small>已用 ${q.articles.used} · 默认 SKU ${sku.articles}${baseArt > sku.articles ? `（已购 ${baseArt}）` : ''}</small>
+          <input type="number" name="lim_articles" min="${q.articles.used}" max="50000" value="${curArt}" required>
         </label>
-        <label>爬虫上限（次）<small>已用 ${q.crawl.used} 次 · 0 不限</small>
-          <input type="number" name="lim_crawl" min="0" step="10" value="${cLim}" required>
+        <label>爬虫上限（次）<small>已用 ${q.crawl.used} · 默认 SKU ${sku.crawlLimit}${baseCrawl > sku.crawlLimit ? `（已购 ${baseCrawl}）` : ''}</small>
+          <input type="number" name="lim_crawl" min="${q.crawl.used}" max="50000" step="10" value="${curCrawl}" required>
         </label>
-        <label>信源上限（元）<small>已耗 ¥${q.sourceSpend.toLocaleString('zh-CN')} · 0 不限</small>
-          <input type="number" name="lim_source" min="0" step="100" value="${sLim}" required>
+        <label>信源上限（元）<small>已耗 ¥${Number(q.sourceSpend || 0).toLocaleString('zh-CN')} · 默认 SKU ¥${sku.sourceLimit.toLocaleString('zh-CN')}${baseSrc > sku.sourceLimit ? `（已购 ¥${baseSrc.toLocaleString('zh-CN')}）` : ''}</small>
+          <input type="number" name="lim_source" min="${minSrc}" max="500000" step="100" value="${curSrc}" required>
         </label>
       </div>
+      <div id="quotaExpandPreview" style="margin-bottom:14px">${pv.html}</div>
       <div class="actions" style="justify-content:space-between">
-        <button type="button" data-reset-ver-default="${esc(o.id)}">↺ 恢复${esc(ver)}默认额度</button>
-        <button type="submit" class="primary">保存本单额度</button>
+        <button type="button" data-reset-ver-default="${esc(o.id)}">↺ 恢复${esc(ver)}默认 SKU 额度</button>
+        <button type="submit" id="quotaEditSubmitBtn" class="primary" ${pv.enough ? '' : 'disabled'}>${pv.calc.total > 0 ? (pv.enough ? `下一步：确认扣费 ¥${pv.calc.total.toLocaleString('zh-CN', { minimumFractionDigits: 2 })} →` : '余额不足，请通过 CRM 充值') : '保存本单额度'}</button>
       </div>
-    </form>`
+    </form>`,
+    true
   );
+}
+
+function openQuotaChargeConfirmModal(o, nextArt, nextCrawl, nextSrc) {
+  const calc = calcQuotaExpandCost(o, nextArt, nextCrawl, nextSrc);
+  const bal = accGetBalance(tenantId);
+  if (bal < calc.total) {
+    toast(`账户余额不足（当前余额 ¥${bal.toFixed(2)}，本次扩容需扣 ¥${calc.total.toFixed(2)}），请联系商务通过 CRM 充值入账。`);
+    return;
+  }
+  pendingQuotaCharge = { orderId: o.id, nextArt, nextCrawl, nextSrc, calc };
+  modal('确认扣除代理商费用 · 订单额度扩容', `
+    <div style="padding:12px 14px;border-radius:10px;background:#fffbeb;border:1px solid #fde68a;color:#92400e;font-size:13px;line-height:1.6;margin-bottom:14px">
+      <b>⚠ 扣费确认提示：</b>订单 <b>${esc(o.id)}（${esc(o.customer)} · ${esc(calc.ver)}）</b>向上调增的额度已超出默认 SKU 额度上限，确认后将立即从代理商 CRM 预存余额扣除对应扩容费用并写入收支明细。
+    </div>
+    ${table(
+      ['扩容项目', '原上限 → 新上限', '超 SKU 增量', '计费标准', '本次扣费'],
+      calc.items.map(it => [
+        `<b>${esc(it.label)}</b>`,
+        `${esc(it.prev)} → <b style="color:var(--blue)">${esc(it.next)}</b>`,
+        badge(it.delta, 'amber'),
+        `<small>${esc(it.unit)}</small>`,
+        `<b style="color:var(--red)">-¥${it.cost.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}</b>`
+      ])
+    )}
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:13px 16px;border-radius:12px;background:#f8fafd;border:1px solid #dbeafe;margin:14px 0 16px">
+      <div>
+        <div style="font-size:12px;color:var(--muted)">本次实扣代理商余额</div>
+        <div style="font-size:24px;font-weight:800;color:var(--red);font-variant-numeric:tabular-nums">-¥${calc.total.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}</div>
+      </div>
+      <div style="text-align:right;font-size:12.5px;line-height:1.7">
+        <div>当前可用余额：<b>¥${bal.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}</b></div>
+        <div style="color:#047857;font-weight:700">扣费后预计余额：¥${(bal - calc.total).toLocaleString('zh-CN', { minimumFractionDigits: 2 })}</div>
+      </div>
+    </div>
+    <div class="actions" style="justify-content:space-between">
+      <button type="button" data-quota-back-edit="${esc(o.id)}">← 返回修改额度</button>
+      <button type="button" id="confirmQuotaChargeBtn" class="primary">确认扣费 ¥${calc.total.toLocaleString('zh-CN', { minimumFractionDigits: 2 })} 并生效</button>
+    </div>
+  `, true);
 }
 
 
@@ -2884,7 +3026,7 @@ function openRateRulesModal() {
 }
 
 function walletLedgerPanel(recs) {
-  const filterGroups = ['全部','CRM 充值','建单/续费','划拨信源花费','API 调用','AI 生文','爬虫消耗','信源发稿','销售工具'];
+  const filterGroups = ['全部','CRM 充值','建单/续费','订单调额扩容','划拨信源花费','API 调用','AI 生文','爬虫消耗','信源发稿','销售工具'];
   const salesTypes = ['选词工具','售前基线测算','售前报告'];
   const orderTypes = ['新建订单','订单续费'];
   const filtered = recs.filter(r => {
@@ -2920,30 +3062,32 @@ function walletLedgerPanel(recs) {
 
 function walletRulesPanel(vd, mCfg, rates) {
   const sd = vd.salesDefaults;
+  const skuSvc = getSkuDefaultQuota('服务版');
+  const skuTool = getSkuDefaultQuota('工具版');
   return `
   <section class="panel pad" style="margin-bottom:16px">
-    ${section('版本默认额度')}
+    ${section('版本默认额度（上限为默认 SKU 额度）')}
     <form id="verDefaultsForm">
       <div class="ver-defaults-grid">
         <div class="ver-default-card">
-          <h3><span>服务版</span>${badge('托管优化','blue')}</h3>
+          <h3><span>服务版</span>${badge(`默认 SKU：${skuSvc.articles}篇 / ${skuSvc.crawlLimit}次 / ¥${skuSvc.sourceLimit}`,'blue')}</h3>
           <div class="ver-default-fields">
-            <label>生文上限（篇）<input type="number" name="svc_art" min="0" value="${vd.service.articles}" required></label>
-            <label>爬虫上限（次）<input type="number" name="svc_crawl" min="0" step="10" value="${vd.service.crawlLimit}" required></label>
-            <label>信源上限（元）<input type="number" name="svc_source" min="0" step="100" value="${vd.service.sourceLimit}" required></label>
+            <label>生文上限（篇 · 最高 ${skuSvc.articles}）<input type="number" name="svc_art" min="1" max="${skuSvc.articles}" value="${Math.min(vd.service.articles, skuSvc.articles)}" required></label>
+            <label>爬虫上限（次 · 最高 ${skuSvc.crawlLimit}）<input type="number" name="svc_crawl" min="10" max="${skuSvc.crawlLimit}" step="10" value="${Math.min(vd.service.crawlLimit, skuSvc.crawlLimit)}" required></label>
+            <label>信源上限（元 · 最高 ¥${skuSvc.sourceLimit}）<input type="number" name="svc_source" min="100" max="${skuSvc.sourceLimit}" step="100" value="${Math.min(vd.service.sourceLimit, skuSvc.sourceLimit)}" required></label>
           </div>
         </div>
         <div class="ver-default-card">
-          <h3><span>工具版</span>${badge('客户自助','green')}</h3>
+          <h3><span>工具版</span>${badge(`默认 SKU：${skuTool.articles}篇 / ${skuTool.crawlLimit}次 / ¥${skuTool.sourceLimit}`,'green')}</h3>
           <div class="ver-default-fields">
-            <label>生文上限（篇）<input type="number" name="tool_art" min="0" value="${vd.tool.articles}" required></label>
-            <label>爬虫上限（次）<input type="number" name="tool_crawl" min="0" step="10" value="${vd.tool.crawlLimit}" required></label>
-            <label>信源上限（元）<input type="number" name="tool_source" min="0" step="100" value="${vd.tool.sourceLimit}" required></label>
+            <label>生文上限（篇 · 最高 ${skuTool.articles}）<input type="number" name="tool_art" min="1" max="${skuTool.articles}" value="${Math.min(vd.tool.articles, skuTool.articles)}" required></label>
+            <label>爬虫上限（次 · 最高 ${skuTool.crawlLimit}）<input type="number" name="tool_crawl" min="10" max="${skuTool.crawlLimit}" step="10" value="${Math.min(vd.tool.crawlLimit, skuTool.crawlLimit)}" required></label>
+            <label>信源上限（元 · 最高 ¥${skuTool.sourceLimit}）<input type="number" name="tool_source" min="100" max="${skuTool.sourceLimit}" step="100" value="${Math.min(vd.tool.sourceLimit, skuTool.sourceLimit)}" required></label>
           </div>
         </div>
       </div>
       <div class="actions" style="justify-content:space-between">
-        <small class="muted">次数或金额上限填 0 表示不限</small>
+        <small class="muted">默认额度向上最高仅限版本默认 SKU 额度；单笔订单如需向上突破，请在「各订单消费与调额」中单独调额并确认扣费</small>
         <div class="actions">
           <button type="button" data-p-act="apply-ver-defaults">套用到现有订单</button>
           <button type="submit" class="primary">保存默认值</button>
@@ -3194,19 +3338,29 @@ document.addEventListener('click', e => {
     if (form) {
       const fd = new FormData(form);
       const vd = accGetVerDefaults(tenantId);
-      vd.service = { articles: Number(fd.get('svc_art')), crawlLimit: Number(fd.get('svc_crawl')), sourceLimit: Number(fd.get('svc_source')) };
-      vd.tool = { articles: Number(fd.get('tool_art')), crawlLimit: Number(fd.get('tool_crawl')), sourceLimit: Number(fd.get('tool_source')) };
+      const skuSvc = getSkuDefaultQuota('服务版');
+      const skuTool = getSkuDefaultQuota('工具版');
+      vd.service = {
+        articles: Math.min(skuSvc.articles, Math.max(1, Number(fd.get('svc_art')))),
+        crawlLimit: Math.min(skuSvc.crawlLimit, Math.max(10, Number(fd.get('svc_crawl')))),
+        sourceLimit: Math.min(skuSvc.sourceLimit, Math.max(100, Number(fd.get('svc_source'))))
+      };
+      vd.tool = {
+        articles: Math.min(skuTool.articles, Math.max(1, Number(fd.get('tool_art')))),
+        crawlLimit: Math.min(skuTool.crawlLimit, Math.max(10, Number(fd.get('tool_crawl')))),
+        sourceLimit: Math.min(skuTool.sourceLimit, Math.max(100, Number(fd.get('tool_source'))))
+      };
       accSaveVerDefaults(tenantId, vd);
       data.orders.forEach(o => {
         const q = ensureOrderQuota(o);
         const t = vd[orderVersion(o.package) === '工具版' ? 'tool' : 'service'];
         q.articles.limit = Math.max(q.articles.used, t.articles);
-        q.crawl.limit = t.crawlLimit;
-        q.sourceLimit = t.sourceLimit;
+        q.crawl.limit = Math.max(q.crawl.used, t.crawlLimit);
+        q.sourceLimit = Math.max(Math.ceil(Number(q.sourceSpend || 0)), t.sourceLimit);
       });
       save(storageKey, data);
       render();
-      toast('已保存默认额度，并同步套用到现有全部服务版与工具版订单');
+      toast('已保存默认额度（不超过默认 SKU 上限），并同步套用到现有订单');
     }
   }
   if (act === 'apply-sales-default') {
@@ -3237,11 +3391,13 @@ document.addEventListener('click', e => {
     const o = data.orders.find(x => x.id === rstBtn.dataset.resetVerDefault);
     const f = $('#quotaEditForm');
     if (o && f) {
-      const t = accGetVerDefaults(tenantId)[orderVersion(o.package)==='工具版'?'tool':'service'];
-      f.elements.lim_articles.value = Math.max(o.quotas.articles.used, t.articles);
-      f.elements.lim_crawl.value = t.crawlLimit;
-      f.elements.lim_source.value = t.sourceLimit;
-      toast('已填入该版本默认额度，点击保存生效');
+      const q = ensureOrderQuota(o);
+      const sku = getSkuDefaultQuota(orderVersion(o.package));
+      f.elements.lim_articles.value = Math.max(q.articles.used, sku.articles);
+      f.elements.lim_crawl.value = Math.max(q.crawl.used, sku.crawlLimit);
+      f.elements.lim_source.value = Math.max(Math.ceil(Number(q.sourceSpend || 0)), sku.sourceLimit);
+      updateOrderQuotaPreview();
+      toast('已恢复该版本默认 SKU 额度（无需额外扣费）');
     }
   }
   const sl = e.target.closest('[data-p-sellerlim]');
@@ -3283,6 +3439,9 @@ document.addEventListener('input', e => {
     walletOrderTerm = e.target.value;
     refreshWalletOrdersTable();
   }
+  if (e.target.closest('#quotaEditForm')) {
+    updateOrderQuotaPreview();
+  }
 });
 
 document.addEventListener('change', e => {
@@ -3305,11 +3464,21 @@ document.addEventListener('submit', e => {
     e.preventDefault();
     const fd = new FormData(e.target);
     const vd = accGetVerDefaults(tenantId);
-    vd.service = { articles: Number(fd.get('svc_art')), crawlLimit: Number(fd.get('svc_crawl')), sourceLimit: Number(fd.get('svc_source')) };
-    vd.tool = { articles: Number(fd.get('tool_art')), crawlLimit: Number(fd.get('tool_crawl')), sourceLimit: Number(fd.get('tool_source')) };
+    const skuSvc = getSkuDefaultQuota('服务版');
+    const skuTool = getSkuDefaultQuota('工具版');
+    vd.service = {
+      articles: Math.min(skuSvc.articles, Math.max(1, Number(fd.get('svc_art')))),
+      crawlLimit: Math.min(skuSvc.crawlLimit, Math.max(10, Number(fd.get('svc_crawl')))),
+      sourceLimit: Math.min(skuSvc.sourceLimit, Math.max(100, Number(fd.get('svc_source'))))
+    };
+    vd.tool = {
+      articles: Math.min(skuTool.articles, Math.max(1, Number(fd.get('tool_art')))),
+      crawlLimit: Math.min(skuTool.crawlLimit, Math.max(10, Number(fd.get('tool_crawl')))),
+      sourceLimit: Math.min(skuTool.sourceLimit, Math.max(100, Number(fd.get('tool_source'))))
+    };
     accSaveVerDefaults(tenantId, vd);
     render();
-    toast('已保存服务版与工具版的默认额度（后续新订单自动套用）');
+    toast('已保存默认额度（最高不超过版本默认 SKU 额度）');
   }
   if (e.target.id === 'salesDefaultForm') {
     e.preventDefault();
@@ -4105,7 +4274,11 @@ function newOrder(customer='') {
   const customerInput = field('客户企业','customer',existing?.customer||'','text',
     existing?'required readonly':'required maxlength="40" list="customer-options"')+
     `<datalist id="customer-options">${options(companyNames)}</datalist>`;
+  const skuSvc = getSkuDefaultQuota('服务版');
   const defSvc = accGetVerDefaults(tenantId).service;
+  const initArt = Math.min(defSvc.articles, skuSvc.articles);
+  const initCrawl = Math.min(defSvc.crawlLimit, skuSvc.crawlLimit);
+  const initSrc = Math.min(defSvc.sourceLimit, skuSvc.sourceLimit);
   const activeOwners = people('优化师').filter(p=>p.status==='在职').map(p=>p.name);
   const initPreview = renderOrderFeePreview('服务版', 3, 0);
   modal(existing ? '新建订单 · '+existing.customer : '新建订单',
@@ -4129,10 +4302,10 @@ function newOrder(customer='') {
         ${[0, 1000, 2000, 3000, 5000].map(v => `<button type="button" class="tool-alloc-pill" data-pick-alloc="${v}" data-target="newOrderToolAlloc">${v === 0 ? '暂不划拨 ¥0' : '¥' + v.toLocaleString('zh-CN')}</button>`).join('')}
       </div>
     </div>` +
-    '<fieldset class="wide hq-price-fields" style="grid-template-columns:repeat(3,minmax(0,1fr))"><legend>初始额度（额外服务管控）</legend>' +
-      `<label>生文上限（篇）<input name="lim_articles" type="number" min="0" value="${defSvc.articles}" required></label>` +
-      `<label>爬虫上限（次）<input name="lim_crawl" type="number" min="0" step="10" value="${defSvc.crawlLimit}" required></label>` +
-      `<label>信源上限（元）<input name="lim_source" type="number" min="0" step="100" value="${defSvc.sourceLimit}" required></label>` +
+    '<fieldset class="wide hq-price-fields" style="grid-template-columns:repeat(3,minmax(0,1fr))"><legend>初始额度（最高为所选版本默认 SKU 额度；建单后可付费扩容）</legend>' +
+      `<label>生文上限（篇）<small id="addOrdArtCap">最高 ${skuSvc.articles} 篇</small><input name="lim_articles" type="number" min="1" max="${skuSvc.articles}" value="${initArt}" required></label>` +
+      `<label>爬虫上限（次）<small id="addOrdCrawlCap">最高 ${skuSvc.crawlLimit} 次</small><input name="lim_crawl" type="number" min="10" max="${skuSvc.crawlLimit}" step="10" value="${initCrawl}" required></label>` +
+      `<label>信源上限（元）<small id="addOrdSrcCap">最高 ¥${skuSvc.sourceLimit}</small><input name="lim_source" type="number" min="100" max="${skuSvc.sourceLimit}" step="100" value="${initSrc}" required></label>` +
     '</fieldset>' +
     `<div id="addOrderFeePreview" class="order-fee-preview ${initPreview.enough?'':'insufficient'}">${initPreview.html}</div>` +
     '<label class="wide">备注<textarea name="note" maxlength="300"></textarea></label>' +
@@ -4224,12 +4397,19 @@ document.addEventListener('change',event=>{
   if (event.target.id==='opRank') filterOperations();
   if (event.target.matches('#addOrder [name="package"]')) {
     const isTool = event.target.value === '工具版';
+    const sku = getSkuDefaultQuota(isTool ? '工具版' : '服务版');
     const vd = accGetVerDefaults(tenantId)[isTool ? 'tool' : 'service'];
     const f = $('#addOrder');
     if (f) {
-      f.elements.lim_articles.value = vd.articles;
-      f.elements.lim_crawl.value = vd.crawlLimit;
-      f.elements.lim_source.value = vd.sourceLimit;
+      f.elements.lim_articles.max = sku.articles;
+      f.elements.lim_crawl.max = sku.crawlLimit;
+      f.elements.lim_source.max = sku.sourceLimit;
+      f.elements.lim_articles.value = Math.min(vd.articles, sku.articles);
+      f.elements.lim_crawl.value = Math.min(vd.crawlLimit, sku.crawlLimit);
+      f.elements.lim_source.value = Math.min(vd.sourceLimit, sku.sourceLimit);
+      if ($('#addOrdArtCap')) $('#addOrdArtCap').textContent = `最高 ${sku.articles} 篇`;
+      if ($('#addOrdCrawlCap')) $('#addOrdCrawlCap').textContent = `最高 ${sku.crawlLimit} 次`;
+      if ($('#addOrdSrcCap')) $('#addOrdSrcCap').textContent = `最高 ¥${sku.sourceLimit}`;
       const ownerSel = $('#addOrderOwner');
       if (ownerSel) {
         ownerSel.disabled = isTool;
@@ -4264,8 +4444,12 @@ const updates = {
     const pay = accDeduct(tenantId, '新建订单', `新建${values.package}订单「${values.customer}」${months}个月（开单基础费）`, baseFee);
     if (!pay.ok) return pay.msg;
     const id='GEO-'+String(Math.max(261107,...data.orders.map(o=>Number(o.id.slice(4))))+1);
+    const sku = getSkuDefaultQuota(isTool ? '工具版' : '服务版');
     const vd = accGetVerDefaults(tenantId)[isTool ? 'tool' : 'service'];
     const assignedOwner = isTool ? '' : (values.owner || '');
+    const initLimArt = Math.min(sku.articles, Math.max(1, Number(values.lim_articles ?? vd.articles)));
+    const initLimCrawl = Math.min(sku.crawlLimit, Math.max(10, Number(values.lim_crawl ?? vd.crawlLimit)));
+    const initLimSrc = Math.min(sku.sourceLimit, Math.max(100, Number(values.lim_source ?? vd.sourceLimit)));
     const newObj = {
       id, customer:values.customer, industry:values.industry, package:values.package,
       months, baseFee,
@@ -4275,9 +4459,10 @@ const updates = {
       published:0, renewal:'待联系', note:values.note || '',
       platforms: plats,
       quotas:{
-        articles:{used:0,limit:Number(values.lim_articles ?? vd.articles)},
-        crawl:{used:0,limit:Number(values.lim_crawl ?? vd.crawlLimit)},
-        sourceSpend:0, sourceLimit:Number(values.lim_source ?? vd.sourceLimit)
+        articles:{used:0,limit:initLimArt},
+        crawl:{used:0,limit:initLimCrawl},
+        sourceSpend:0, sourceLimit:initLimSrc,
+        paidBase:{ articles: sku.articles, crawl: sku.crawlLimit, source: sku.sourceLimit }
       },
       modules:[...partnerClientModules]
     };
@@ -4663,6 +4848,43 @@ document.addEventListener('click', event => {
     if (o) openOrderQuotaModal(o);
     return;
   }
+  const qBackBtn = event.target.closest('[data-quota-back-edit]');
+  if (qBackBtn) {
+    const o = data.orders.find(x => x.id === qBackBtn.dataset.quotaBackEdit);
+    if (o) {
+      const draft = pendingQuotaCharge && pendingQuotaCharge.orderId === o.id
+        ? { lim_articles: pendingQuotaCharge.nextArt, lim_crawl: pendingQuotaCharge.nextCrawl, lim_source: pendingQuotaCharge.nextSrc }
+        : null;
+      openOrderQuotaModal(o, draft);
+    }
+    return;
+  }
+  if (event.target.closest('#confirmQuotaChargeBtn')) {
+    if (!pendingQuotaCharge) return;
+    const { orderId, nextArt, nextCrawl, nextSrc } = pendingQuotaCharge;
+    const o = data.orders.find(x => x.id === orderId);
+    if (!o) { pendingQuotaCharge = null; return; }
+    const calc = calcQuotaExpandCost(o, nextArt, nextCrawl, nextSrc);
+    const summaryParts = calc.items.map(it => `${it.label}${it.delta}（¥${it.cost.toFixed(2)}）`).join(' + ');
+    const pay = accDeduct(tenantId, '订单调额扩容', `订单「${o.customer} · ${o.id}」超默认 SKU 向上调额：${summaryParts}`, calc.total);
+    if (!pay.ok) { toast(pay.msg); return; }
+    const q = ensureOrderQuota(o);
+    q.articles.limit = nextArt;
+    q.crawl.limit = nextCrawl;
+    q.sourceLimit = nextSrc;
+    q.paidBase = {
+      articles: Math.max(calc.baseArt, nextArt),
+      crawl: Math.max(calc.baseCrawl, nextCrawl),
+      source: Math.max(calc.baseSrc, nextSrc)
+    };
+    appendOrderQuotaLog(o.id, `代理商付费向上调额（扣代理商余额 ¥${calc.total.toFixed(2)}）：生文上限 ${nextArt} 篇、爬虫上限 ${nextCrawl} 次、信源上限 ¥${nextSrc.toLocaleString('zh-CN')}`);
+    pendingQuotaCharge = null;
+    save(storageKey, data);
+    $('#dialog').close();
+    render();
+    toast(`扣费成功！已扣除代理商余额 ¥${calc.total.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}，当前余额 ¥${pay.balance.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}`);
+    return;
+  }
   const qfBtn = event.target.closest('[data-quick-cust-filter]');
   if (qfBtn) {
     Object.assign(customerFilters, customerFilterDefaults, { quick: qfBtn.dataset.quickCustFilter });
@@ -4851,18 +5073,26 @@ document.addEventListener('submit', event => {
   const o = data.orders.find(x => x.id === f.dataset.id);
   if (!o) return;
   const fd = new FormData(f);
-  ensureOrderQuota(o);
+  const q = ensureOrderQuota(o);
   const nextArt = Number(fd.get('lim_articles'));
   const nextCrawl = Number(fd.get('lim_crawl'));
   const nextSrc = Number(fd.get('lim_source'));
-  o.quotas.articles.limit = nextArt;
-  o.quotas.crawl.limit = nextCrawl;
-  o.quotas.sourceLimit = nextSrc;
-  appendOrderQuotaLog(o.id, `代理商调整额度：生文上限 ${nextArt} 篇、爬虫上限 ${nextCrawl || '不限'} 次、信源上限 ${nextSrc ? '¥' + nextSrc : '不限'}`);
+  if (nextArt < q.articles.used) { toast(`生文上限不能低于已用 ${q.articles.used} 篇`); return; }
+  if (nextCrawl < q.crawl.used) { toast(`爬虫上限不能低于已用 ${q.crawl.used} 次`); return; }
+  if (nextSrc < Math.ceil(Number(q.sourceSpend || 0))) { toast(`信源上限不能低于已耗 ¥${Number(q.sourceSpend || 0).toLocaleString('zh-CN')}`); return; }
+  const calc = calcQuotaExpandCost(o, nextArt, nextCrawl, nextSrc);
+  if (calc.total > 0) {
+    openQuotaChargeConfirmModal(o, nextArt, nextCrawl, nextSrc);
+    return;
+  }
+  q.articles.limit = nextArt;
+  q.crawl.limit = nextCrawl;
+  q.sourceLimit = nextSrc;
+  appendOrderQuotaLog(o.id, `代理商调整额度（默认 SKU 额度内免费）：生文上限 ${nextArt} 篇、爬虫上限 ${nextCrawl} 次、信源上限 ¥${nextSrc.toLocaleString('zh-CN')}`);
   save(storageKey, data);
   $('#dialog').close();
   render();
-  toast(`已单独更新「${o.customer}」的订单额度`);
+  toast(`已更新「${o.customer}」的订单额度（在默认 SKU 额度内，未产生额外扣费）`);
 });
 
 addEventListener('hashchange',render);
@@ -4870,6 +5100,13 @@ addEventListener('hashchange',render);
 render();
 if (portalParams.get('open') === 'rates') openRateRulesModal();
 if (portalParams.get('open') === 'neworder') newOrder();
+if (portalParams.get('open') === 'quota' && data.orders[0]) {
+  const o0 = data.orders[0];
+  openOrderQuotaModal(o0, { lim_articles: 100, lim_crawl: 200, lim_source: 6000 });
+}
+if (portalParams.get('open') === 'quota-confirm' && data.orders[0]) {
+  openQuotaChargeConfirmModal(data.orders[0], 100, 200, 6000);
+}
 
 </script>
 </body>
