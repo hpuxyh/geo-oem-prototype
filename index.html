@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GEO OEM 全链路系统</title>
+<style>
+:root {
+  --bar-bg: rgba(9, 21, 40, 0.97);
+  --line: rgba(148, 184, 235, 0.16);
+  --font: Inter, -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; font: 13px/1.4 var(--font); background: #f4f7fc; -webkit-font-smoothing: antialiased; }
+.suite-shell { display: flex; flex-direction: column; height: 100vh; width: 100vw; }
+.suite-dock {
+  height: 48px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; padding: 0 16px; background: var(--bar-bg); border-bottom: 1px solid var(--line); color: #e2ecf9; z-index: 50;
+}
+.suite-brand { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.suite-logo {
+  width: 26px; height: 26px; border-radius: 7px; background: linear-gradient(135deg, #2b7fff, #6348f5);
+  display: grid; place-items: center; font-weight: 800; font-size: 13px; color: #fff;
+}
+.suite-tabs {
+  display: flex; align-items: center; gap: 3px; padding: 3px;
+  background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px; overflow-x: auto;
+}
+.suite-tab {
+  display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; border-radius: 7px; border: 0;
+  background: transparent; color: #9fb4d1; font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; white-space: nowrap;
+}
+.suite-tab i {
+  font-style: normal; font-size: 10px; padding: 1px 4px; border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08); color: #cbd5e1;
+}
+.suite-tab:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
+.suite-tab[aria-selected="true"] { background: linear-gradient(180deg, #256eff, #1658e6); color: #fff; box-shadow: 0 2px 8px rgba(22, 100, 255, 0.45); }
+.suite-tab[data-key="client-tool"][aria-selected="true"] { background: linear-gradient(180deg, #7356ff, #583cf0); }
+.suite-open {
+  display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.16); background: rgba(255, 255, 255, 0.06);
+  color: #e2ecf9; text-decoration: none; font-size: 12px; font-weight: 500; white-space: nowrap;
+}
+.suite-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.suite-tenant {
+  padding: 4px 10px; border-radius: 7px; border: 1px solid rgba(148, 184, 235, 0.25);
+  background: rgba(255, 255, 255, 0.08); color: #f1f5f9; font: inherit; font-size: 12px; font-weight: 600;
+  cursor: pointer; outline: none; max-width: 190px;
+}
+.suite-tenant option { background: #0f172a; color: #f8fafc; }
+.suite-stage { flex: 1; position: relative; background: #f4f7fc; }
+.suite-frame { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #f4f7fc; }
+</style>
+</head>
+<body>
+<div class="suite-shell">
+  <header class="suite-dock">
+    <div class="suite-brand">
+      <span class="suite-logo">G</span>
+      <b style="font-size:13px;color:#fff">GEO OEM 系统</b>
+    </div>
+    <div class="suite-tabs" role="tablist">
+      <button class="suite-tab" role="tab" data-key="hq" data-src="./hq.html" data-hash="#partners" aria-selected="false"><i>01</i>超管后台</button>
+      <button class="suite-tab" role="tab" data-key="partner" data-src="./partner.html" data-hash="#customers" aria-selected="true"><i>02</i>代理商后台</button>
+      <button class="suite-tab" role="tab" data-key="sales" data-src="./sales.html" data-hash="" aria-selected="false"><i>03</i>销售系统</button>
+      <button class="suite-tab" role="tab" data-key="optimizer" data-src="./optimizer.html" data-hash="" aria-selected="false"><i>04</i>优化师系统</button>
+      <button class="suite-tab" role="tab" data-key="client-service-opt" data-src="./client.html" data-svc-role="optimizer" data-hash="#report" aria-selected="false"><i>05</i>服务版·优化师端</button>
+      <button class="suite-tab" role="tab" data-key="client-service" data-src="./client.html" data-svc-role="client" data-hash="#report" aria-selected="false"><i>06</i>服务版·客户端</button>
+      <button class="suite-tab" role="tab" data-key="client-tool" data-src="./client-tool.html" data-hash="#report" aria-selected="false"><i>07</i>工具版·客户端</button>
+    </div>
+    <div class="suite-right">
+      <select class="suite-tenant" id="suiteTenant" aria-label="切换代理商视角" title="切换当前查看的代理商视角"></select>
+      <a class="suite-open" id="suiteOpen" href="./partner.html#customers" target="_blank" rel="noopener">独立窗口 ↗</a>
+    </div>
+  </header>
+  <main class="suite-stage">
+    <iframe class="suite-frame" id="suiteFrame" title="GEO OEM 视图"></iframe>
+  </main>
+</div>
+<script>
+const tabs = document.querySelectorAll('.suite-tab');
+const frame = document.getElementById('suiteFrame');
+const openLink = document.getElementById('suiteOpen');
+const tenantSel = document.getElementById('suiteTenant');
+const FALLBACK_PARTNERS = [
+  { id: 'OEM-001', name: '青屿数字科技', brand: '青屿增长', color: '#1664ff' },
+  { id: 'OEM-002', name: '海港品牌咨询', brand: '海港增长', color: '#0891b2' },
+  { id: 'OEM-003', name: '北辰企业服务', brand: '北辰 GEO', color: '#6366f1' }
+];
+function getPartners() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('geo-oem-hq-v9') || 'null');
+    if (Array.isArray(saved) && saved.length) return saved;
+  } catch {}
+  return FALLBACK_PARTNERS;
+}
+let activeTenantId = localStorage.getItem('geo-oem-suite-tenant') || 'OEM-001';
+let initView = new URLSearchParams(location.search).get('view') || '';
+let activeTab = tabs[1];
+function syncTenantOptions() {
+  const list = getPartners();
+  if (!list.some(p => p.id === activeTenantId)) activeTenantId = list[0].id;
+  tenantSel.innerHTML = list.map(p => `<option value="${p.id}" ${p.id === activeTenantId ? 'selected' : ''}>${p.name} (${p.id})</option>`).join('');
+}
+function buildTargetUrl(btn, customHash, bust) {
+  const base = btn.dataset.src;
+  const h = customHash !== undefined ? customHash : (btn.dataset.hash || '');
+  const qs = new URLSearchParams();
+  if (btn.dataset.key !== 'hq') {
+    const p = getPartners().find(x => x.id === activeTenantId) || FALLBACK_PARTNERS[0];
+    qs.set('tenant', p.id);
+    qs.set('brand', p.brand);
+    qs.set('color', p.color);
+    if (btn.dataset.key === 'partner') qs.set('agency', p.name);
+    if (btn.dataset.svcRole) qs.set('svcRole', btn.dataset.svcRole);
+    if (btn.dataset.key === 'client-tool') {
+      const pKey = p.id === 'OEM-001' ? 'geo-oem-partner-v9' : 'geo-oem-partner-v9-' + p.id;
+      let toolOrd = null;
+      try {
+        const pd = JSON.parse(localStorage.getItem(pKey) || 'null');
+        if (pd && Array.isArray(pd.orders)) toolOrd = pd.orders.find(o => o.package === '工具版') || null;
+      } catch {}
+      const defMap = { 'OEM-001': { id: 'GEO-261104', customer: '知禾软件' }, 'OEM-002': { id: 'GEO-261091', customer: '澜桥仪器' } };
+      const picked = toolOrd || defMap[p.id];
+      if (picked) { qs.set('order', picked.id); qs.set('project', picked.customer); }
+    }
+  }
+  if ((btn.dataset.key === 'optimizer' || btn.dataset.key === 'sales') && initView) {
+    qs.set('view', initView);
+    initView = '';
+  }
+  if (bust) qs.set('_v', String(Date.now()));
+  const qStr = qs.toString();
+  return `${base}${qStr ? '?' + qStr : ''}${h}`;
+}
+function selectTab(btn, customHash) {
+  activeTab = btn;
+  tabs.forEach(t => t.setAttribute('aria-selected', String(t === btn)));
+  tenantSel.style.display = btn.dataset.key === 'hq' ? 'none' : '';
+  frame.src = buildTargetUrl(btn, customHash, true);
+  openLink.href = buildTargetUrl(btn, customHash, false);
+  history.replaceState(null, '', '#' + btn.dataset.key);
+}
+tenantSel.addEventListener('change', () => {
+  activeTenantId = tenantSel.value;
+  localStorage.setItem('geo-oem-suite-tenant', activeTenantId);
+  selectTab(activeTab);
+});
+window.addEventListener('storage', e => {
+  if (e.key === 'geo-oem-hq-v9') syncTenantOptions();
+});
+tabs.forEach(btn => btn.addEventListener('click', () => selectTab(btn)));
+syncTenantOptions();
+const initKey = location.hash.slice(1) || 'partner';
+const match = [...tabs].find(t => t.dataset.key === initKey) || tabs[1];
+selectTab(match);
+</script>
+</body>
+</html>

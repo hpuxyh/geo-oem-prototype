@@ -1,0 +1,77 @@
+.studio-wide-dialog:has(.client-detail) {
+  width: min(800px, calc(100vw - 24px));
+}
+
+.client-detail {
+  display: grid;
+  gap: 16px;
+}
+
+.client-detail-section,
+.client-preview {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid #e2e9f4;
+  border-radius: 10px;
+  background: #fff;
+  overflow-wrap: anywhere;
+}
+
+.client-detail-section h3 {
+  font-size: 14px;
+  margin: 0 0 10px;
+}
+
+.client-detail-section p,
+.client-detail-section .studio-preview-body {
+  margin: 0;
+}
+
+.client-detail-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 145px), 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.client-detail-fields div {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #f5f8fc;
+}
+
+.client-detail-fields dt {
+  color: #526884;
+  font-size: 12px;
+}
+
+.client-detail-fields dd {
+  margin: 4px 0 0;
+  font-weight: 500;
+}
+
+.client-detail-chips,
+.client-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.client-detail-actions {
+  justify-content: flex-end;
+}
+
+.client-preview .studio-preview-meta {
+  margin-bottom: 8px;
+}
+
+.client-preview .studio-preview-title {
+  margin: 0 0 14px;
+}
+
+.client-preview .client-detail-section {
+  margin-top: 16px;
+}

@@ -1,0 +1,3475 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GEO OEM · 销售系统</title>
+<style>
+/* ==========================================================================
+   GEO OEM Enterprise Design System — Unified Admin & Portal Theme
+   ========================================================================== */
+:root {
+  --tenant-color: #1664ff;
+  --blue: var(--tenant-color, #1664ff);
+  --brand-hover: color-mix(in srgb, var(--blue) 86%, #06142e);
+  --tint: color-mix(in srgb, var(--blue) 9%, #ffffff);
+  --tint-strong: color-mix(in srgb, var(--blue) 15%, #ffffff);
+  --brand-border: color-mix(in srgb, var(--blue) 26%, #ffffff);
+  --brand-ring: color-mix(in srgb, var(--blue) 16%, transparent);
+
+  --ink: #0f1d35;
+  --ink-soft: #1e314f;
+  --muted: #5a6d87;
+  --subtle: #8496ae;
+  --line: #e3eaf4;
+  --line-strong: #d0dceb;
+  --bg: #f4f7fc;
+  --surface: #ffffff;
+  --surface-subtle: #f8fafd;
+
+  --green: #067647;
+  --green-bg: #ecfdf5;
+  --green-bd: #bbf7d0;
+  --amber: #b45309;
+  --amber-bg: #fffbeb;
+  --amber-bd: #fde68a;
+  --red: #be123c;
+  --red-bg: #fff1f2;
+  --red-bd: #fecdd3;
+
+  --radius-sm: 8px;
+  --radius-md: 11px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  --shadow-xs: 0 1px 2px rgba(15, 29, 53, 0.035);
+  --shadow-sm: 0 2px 8px -2px rgba(15, 29, 53, 0.05), 0 1px 3px rgba(15, 29, 53, 0.03);
+  --shadow-md: 0 10px 28px -6px rgba(15, 29, 53, 0.08), 0 2px 6px rgba(15, 29, 53, 0.04);
+  --shadow-dialog: 0 28px 90px -12px rgba(9, 20, 44, 0.28), 0 0 0 1px rgba(15, 29, 53, 0.06);
+
+  --font: Inter, -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font: 14px/1.6 var(--font);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(1000px 380px at 68% -60px, color-mix(in srgb, var(--blue) 7%, transparent), transparent 70%),
+    radial-gradient(700px 320px at 15% -40px, rgba(56, 189, 248, 0.05), transparent 65%);
+  background-attachment: fixed;
+}
+
+/* Custom Subtle Scrollbars */
+::-webkit-scrollbar { width: 7px; height: 7px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+a {
+  color: var(--blue);
+  text-decoration: none;
+  transition: color 0.16s ease, background-color 0.16s ease, border-color 0.16s ease;
+}
+
+h1, h2, h3, p {
+  margin: 0;
+}
+
+h1 {
+  font-size: 25px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.28;
+  color: var(--ink);
+}
+
+h2 {
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+}
+
+h3 {
+  font-size: 15px;
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.muted, small {
+  color: var(--muted);
+}
+
+small {
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+button, input, select, textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   App Shell: Sidebar & Sticky Glass Topbar
+   ========================================================================== */
+.layout {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #ffffff 0%, #fafcff 100%);
+  border-right: 1px solid var(--line);
+  box-shadow: 4px 0 24px rgba(15, 29, 53, 0.02);
+  padding: 22px 14px 16px;
+  overflow-y: auto;
+  z-index: 35;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 2px 10px 22px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid #eef3f9;
+  color: var(--ink);
+}
+
+.mark {
+  min-width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: linear-gradient(140deg, color-mix(in srgb, var(--blue) 90%, #5cb8ff), var(--brand-hover));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 6px 14px -3px color-mix(in srgb, var(--blue) 36%, transparent);
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+}
+
+.brand b {
+  font-size: 18px;
+  font-weight: 750;
+  line-height: 1.22;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+html[style*="--tenant-color"] .brand b {
+  color: var(--blue);
+}
+
+.brand small {
+  display: inline-block;
+  margin-top: 3px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+.nav {
+  padding-top: 8px;
+}
+
+.nav-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--subtle);
+  padding: 16px 12px 6px;
+}
+
+.nav a, .nav button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 11px;
+  width: 100%;
+  padding: 9px 12px;
+  min-height: 40px;
+  margin-bottom: 3px;
+  color: #415572;
+  font-size: 13.5px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  text-align: left;
+  transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav a i, .nav button i {
+  font-style: normal;
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  flex: none;
+  color: #6b7f99;
+  transition: color 0.16s ease, transform 0.16s ease;
+}
+
+.nav a i svg, .nav button i svg {
+  width: 18px;
+  height: 18px;
+}
+
+.nav a:hover, .nav button:hover {
+  background: #f2f6fc;
+  color: var(--ink);
+  border-color: transparent;
+}
+
+.nav a:hover i, .nav button:hover i {
+  color: var(--blue);
+}
+
+.nav a[aria-current="page"], .nav button[aria-current="page"] {
+  background: var(--tint);
+  color: var(--blue);
+  font-weight: 650;
+  border-color: color-mix(in srgb, var(--blue) 14%, transparent);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--blue) 6%, transparent);
+}
+
+.nav a[aria-current="page"]::before, .nav button[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  left: -7px;
+  top: 9px;
+  bottom: 9px;
+  width: 3.5px;
+  border-radius: 999px;
+  background: var(--blue);
+}
+
+.nav a[aria-current="page"] i, .nav button[aria-current="page"] i {
+  color: var(--blue);
+}
+
+.side-foot {
+  margin-top: auto;
+  padding: 16px 2px 0;
+}
+
+.side-foot > div {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 12px;
+  background: var(--surface-subtle);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.side-avatar {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  background: linear-gradient(135deg, var(--tint-strong), var(--tint));
+  border: 1px solid var(--brand-border);
+  color: var(--blue);
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.side-avatar::after {
+  content: "";
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #10b981;
+  border: 2px solid #ffffff;
+}
+
+.side-foot b {
+  display: block;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.side-foot small {
+  display: block;
+  font-size: 11px;
+  color: var(--subtle);
+  margin-top: 1px;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 25;
+  min-height: 60px;
+  padding: 10px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.84);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(227, 234, 244, 0.92);
+}
+
+.path {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+}
+
+.path-label {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.path-sep {
+  color: #a1b2c8;
+  font-size: 14px;
+}
+
+.topbar .path b {
+  color: var(--ink);
+  font-weight: 650;
+}
+
+main {
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 26px 32px 52px;
+}
+
+/* ==========================================================================
+   Headers: Hero Workspace Cover & Clean Subpage Header
+   ========================================================================== */
+.intro, .section-head, .actions, .filters {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.actions, .filters {
+  justify-content: flex-start;
+}
+
+.intro:not(.workspace-cover) {
+  margin: 0 0 16px;
+  padding: 2px 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  position: relative;
+}
+
+.intro:not(.workspace-cover)::before {
+  display: none;
+}
+
+.intro:not(.workspace-cover) h1 {
+  font-size: 20px;
+  letter-spacing: -0.02em;
+}
+
+.intro p, .section-head p {
+  margin-top: 4px;
+  font-size: 13px;
+}
+
+.workspace-cover {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  min-height: 188px;
+  padding: 28px 32px;
+  margin-bottom: 20px;
+  background:
+    radial-gradient(ellipse at 86% 24%, color-mix(in srgb, var(--blue) 42%, #0ea5e9) 0%, transparent 56%),
+    radial-gradient(ellipse at 65% 110%, rgba(14, 165, 233, 0.22), transparent 52%),
+    linear-gradient(118deg, #071529 0%, #0b2240 58%, #10335c 100%);
+  border: 1px solid rgba(56, 130, 246, 0.28);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 14px 34px -10px rgba(8, 24, 54, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.workspace-cover h1 {
+  font-size: clamp(24px, 2.6vw, 32px);
+  line-height: 1.22;
+  margin: 10px 0 8px;
+  color: #ffffff;
+  letter-spacing: -0.025em;
+}
+
+.workspace-cover p {
+  margin: 0;
+  color: #bfd4ee;
+  font-size: 14px;
+  max-width: 560px;
+}
+
+.cover-copy, .cover-action {
+  position: relative;
+  z-index: 1;
+}
+
+.cover-action {
+  margin-top: 18px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.cover-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #bae6fd;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  backdrop-filter: blur(6px);
+}
+
+.cover-label::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 8px #38bdf8;
+}
+
+.cover-grid {
+  position: absolute;
+  inset: 0 0 0 42%;
+  z-index: -1;
+  opacity: 0.72;
+  pointer-events: none;
+  background:
+    radial-gradient(circle, rgba(152, 223, 255, 0.45) 1px, transparent 1.5px) 0 0 / 24px 24px,
+    repeating-linear-gradient(135deg, transparent 0 68px, rgba(119, 194, 255, 0.09) 69px 70px, transparent 71px 112px);
+  mask-image: linear-gradient(90deg, transparent, #000 50%);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 50%);
+}
+
+.cover-grid::after {
+  content: "";
+  position: absolute;
+  width: 380px;
+  height: 120px;
+  right: 3%;
+  bottom: -26px;
+  transform: rotate(-16deg);
+  border: 1px solid rgba(148, 209, 247, 0.35);
+  border-radius: 50%;
+  box-shadow: 0 0 0 18px rgba(115, 197, 255, 0.04), 0 0 0 38px rgba(115, 197, 255, 0.03);
+}
+
+/* Cover light secondary buttons (e.g. return link inside dark cover) */
+.workspace-cover .button:not(.primary) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  backdrop-filter: blur(6px);
+}
+.workspace-cover .button:not(.primary):hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.38);
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   Buttons & Action Links
+   ========================================================================== */
+.button, button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 14px;
+  min-height: 36px;
+  white-space: nowrap;
+  box-shadow: var(--shadow-xs);
+  transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.button:hover, button:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+  background: #fbfdff;
+}
+
+.button:active, button:active {
+  transform: translateY(0.5px);
+}
+
+.primary, button.primary {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--blue) 94%, #ffffff) 0%, var(--blue) 100%);
+  border-color: var(--blue);
+  color: #ffffff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 4px 12px -2px color-mix(in srgb, var(--blue) 38%, transparent);
+}
+
+.primary:hover, button.primary:hover {
+  background: linear-gradient(180deg, var(--blue) 0%, var(--brand-hover) 100%);
+  border-color: var(--brand-hover);
+  color: #ffffff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 6px 16px -2px color-mix(in srgb, var(--blue) 48%, transparent);
+}
+
+.cover-action .primary {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 8px 22px rgba(10, 30, 82, 0.45);
+}
+
+.link-button {
+  border: 1px solid transparent;
+  color: var(--blue);
+  padding: 4px 9px;
+  min-height: 28px;
+  font-size: 12.5px;
+  font-weight: 600;
+  background: var(--tint);
+  border-radius: 7px;
+  box-shadow: none;
+}
+
+.link-button:hover {
+  background: var(--tint-strong);
+  border-color: var(--brand-border);
+  color: var(--brand-hover);
+}
+
+.order-preview {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 9px;
+  min-height: 28px;
+  border-radius: 7px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  background: #f3f6fb;
+  border: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.order-preview:hover {
+  color: var(--blue);
+  background: var(--tint);
+  border-color: var(--brand-border);
+}
+
+.cell-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* ==========================================================================
+   Panels, KPI Metrics & Progress Bars
+   ========================================================================== */
+.panel, .metric {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.panel {
+  margin-bottom: 18px;
+  overflow: hidden;
+}
+
+.pad {
+  padding: 20px 22px;
+}
+
+.section-head {
+  margin-bottom: 14px;
+}
+
+.panel > .pad:has(+ .scroll) {
+  padding-bottom: 14px;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.metric {
+  position: relative;
+  padding: 18px 20px;
+  min-height: 114px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.metric:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--brand-border);
+}
+
+.metric::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--blue), #38bdf8);
+  opacity: 0.85;
+}
+
+.metric:nth-child(2)::before { background: linear-gradient(90deg, #10b981, #34d399); }
+.metric:nth-child(3)::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.metric:nth-child(4)::before { background: linear-gradient(90deg, #6366f1, #818cf8); }
+
+.metric::after {
+  content: "";
+  position: absolute;
+  top: -18px;
+  right: -18px;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--blue) 9%, transparent) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.metric span {
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.metric strong {
+  display: block;
+  font-size: 30px;
+  font-weight: 750;
+  line-height: 1.25;
+  margin: 6px 0 4px;
+  color: var(--ink);
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.metric small {
+  font-size: 12px;
+  color: var(--subtle);
+}
+
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: 18px;
+}
+
+.list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 13px 0;
+  border-bottom: 1px solid #edf2f9;
+}
+
+.list-row:last-child {
+  border-bottom: 0;
+  padding-bottom: 2px;
+}
+
+.list-row small {
+  display: block;
+  margin-top: 3px;
+}
+
+.bar {
+  height: 8px;
+  background: #edf2fa;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bar i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--blue), #38bdf8);
+  border-radius: inherit;
+  transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ==========================================================================
+   Semantic Status Badges (with Subtle Indicator Dot)
+   ========================================================================== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 2.5px 9px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.45;
+  white-space: nowrap;
+  color: #475569;
+}
+
+.badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.75;
+  flex-shrink: 0;
+}
+
+.badge.green {
+  color: var(--green);
+  background: var(--green-bg);
+  border-color: var(--green-bd);
+}
+
+.badge.blue {
+  color: var(--blue);
+  background: var(--tint);
+  border-color: var(--brand-border);
+}
+
+.badge.amber {
+  color: var(--amber);
+  background: var(--amber-bg);
+  border-color: var(--amber-bd);
+}
+
+.badge.red {
+  color: var(--red);
+  background: var(--red-bg);
+  border-color: var(--red-bd);
+}
+
+/* ==========================================================================
+   Filters, Inputs & Modern Form Controls
+   ========================================================================== */
+.filters {
+  padding: 14px 18px;
+  gap: 10px;
+  background: #fbfcfe;
+  border-bottom: 1px solid var(--line);
+}
+
+.filters > label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.filters > .badge {
+  margin-left: auto;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="color"]), select, textarea {
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 13.5px;
+  padding: 7px 12px;
+  min-height: 38px;
+  box-shadow: var(--shadow-xs);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):hover, select:hover, textarea:hover {
+  border-color: #b4c6de;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--brand-ring);
+  background: #ffffff;
+}
+
+input[readonly] {
+  background: #f5f8fc;
+  color: var(--muted);
+  border-color: var(--line);
+}
+
+input[type="search"] {
+  min-width: 240px;
+  padding-left: 35px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='%23788ba5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 11px center;
+}
+
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 32px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235a6d87' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+input[type="color"] {
+  width: 56px;
+  height: 38px;
+  padding: 3px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 92px;
+  line-height: 1.55;
+}
+
+/* ==========================================================================
+   Data Tables & Collapsible Customer Groups
+   ========================================================================== */
+.scroll {
+  overflow-x: auto;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 560px;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+
+th, td {
+  padding: 13px 16px;
+  border-bottom: 1px solid #edf2f9;
+  vertical-align: middle;
+}
+
+th {
+  background: #f7f9fc;
+  color: #51647f;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--line);
+}
+
+tbody tr {
+  transition: background-color 0.12s ease;
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+tbody tr:hover {
+  background: #f6f9ff;
+}
+
+td b {
+  color: var(--ink);
+  font-weight: 650;
+}
+
+td small {
+  font-size: 11.5px;
+  color: var(--subtle);
+}
+
+.table-foot {
+  padding: 12px 18px;
+  border-top: 1px solid var(--line);
+  background: #fafcfe;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 42px 24px;
+  font-size: 13.5px;
+}
+
+.customer-group {
+  border-bottom: 1px solid var(--line);
+  transition: background-color 0.16s ease;
+}
+
+.customer-group:last-child {
+  border-bottom: 0;
+}
+
+.customer-group summary {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 15px 18px;
+  cursor: pointer;
+  list-style: none;
+  transition: background-color 0.15s ease;
+}
+
+.customer-group summary::-webkit-details-marker {
+  display: none;
+}
+
+.customer-group summary::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid #647b98;
+  border-bottom: 2px solid #647b98;
+  transform: rotate(-45deg);
+  flex: none;
+  transition: transform 0.18s ease, border-color 0.18s ease;
+}
+
+.customer-group[open] summary::before {
+  transform: rotate(45deg);
+  border-color: var(--blue);
+}
+
+.customer-group summary:hover {
+  background: #f7faff;
+}
+
+.customer-group[open] > summary {
+  background: #f3f8ff;
+}
+
+.customer-group summary b {
+  font-size: 14.5px;
+  color: var(--ink);
+}
+
+.customer-group summary small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+}
+
+.customer-group summary .badge {
+  margin-left: auto;
+}
+
+.customer-orders {
+  border-top: 1px solid var(--line);
+  padding: 14px 18px 16px;
+  background: #fbfdff;
+}
+
+.customer-orders .section-head {
+  margin: 0 0 10px;
+}
+
+.customer-orders .section-head h2 {
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+.customer-orders .scroll {
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: #ffffff;
+}
+
+/* ==========================================================================
+   Dialogs, Property Lists & Toast Notifications
+   ========================================================================== */
+dialog {
+  width: min(580px, calc(100% - 28px));
+  max-height: calc(100dvh - 32px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  color: var(--ink);
+  padding: 0;
+  box-shadow: var(--shadow-dialog);
+  overflow: auto;
+}
+
+dialog::backdrop {
+  background: rgba(11, 22, 44, 0.46);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+dialog > .section-head {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(10px);
+  padding: 17px 22px;
+  margin: 0;
+  border-bottom: 1px solid var(--line);
+}
+
+dialog > .section-head h2 {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+dialog > .section-head form button {
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  padding: 0;
+  border-radius: 8px;
+  border-color: transparent;
+  background: #f1f5f9;
+  color: #475569;
+  box-shadow: none;
+}
+
+dialog > .section-head form button:hover {
+  background: #e2e8f0;
+  color: var(--ink);
+}
+
+#dialogBody {
+  padding: 20px 22px 22px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 4px 0 20px;
+}
+
+.form-grid > label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.wide {
+  grid-column: 1 / -1;
+}
+
+dl {
+  display: grid;
+  grid-template-columns: 112px 1fr;
+  gap: 10px 14px;
+  margin: 4px 0 18px;
+  padding: 14px 16px;
+  background: var(--surface-subtle);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+dt {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+dd {
+  margin: 0;
+  color: var(--ink);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  background: #0f1d35;
+  color: #ffffff;
+  padding: 11px 18px;
+  border-radius: 11px;
+  font-size: 13.5px;
+  font-weight: 500;
+  box-shadow: 0 14px 34px rgba(9, 20, 44, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  z-index: 90;
+}
+
+.portal-section {
+  scroll-margin-top: 76px;
+}
+
+/* ==========================================================================
+   HQ Specific Controls (Module Pill Checkboxes & Pricing Grid)
+   ========================================================================== */
+.hq-module-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  max-width: 360px;
+}
+
+.hq-module-tags .badge::before {
+  display: none;
+}
+
+.hq-permissions {
+  border: 1px solid var(--line);
+  background: var(--surface-subtle);
+  border-radius: 12px;
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.hq-permissions legend, .hq-price-fields legend {
+  padding: 0 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+.hq-permissions label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid var(--line-strong);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.hq-permissions label:hover {
+  border-color: var(--blue);
+}
+
+.hq-permissions label:has(input:checked) {
+  background: var(--tint);
+  border-color: var(--blue);
+  color: var(--blue);
+  font-weight: 600;
+}
+
+.hq-permissions input {
+  min-height: auto;
+  margin: 0;
+  accent-color: var(--blue);
+}
+
+.hq-price-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface-subtle);
+  border-radius: 12px;
+  padding: 12px 14px 14px;
+}
+
+.hq-price-fields label {
+  display: grid;
+  gap: 5px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.hq-price-fields small {
+  grid-column: 1 / -1;
+  color: var(--muted);
+}
+
+.hq-price-fields input {
+  width: 100%;
+  min-width: 0;
+}
+
+/* ==========================================================================
+   Responsive Breakpoints
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .layout { grid-template-columns: 196px minmax(0, 1fr); }
+  main, .topbar { padding-inline: 20px; }
+  .split { grid-template-columns: 1fr; }
+  .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .workspace-cover { padding: 24px; min-height: 164px; }
+}
+
+@media (max-width: 720px) {
+  .layout { display: block; }
+  .sidebar { position: static; height: auto; padding: 14px 14px 10px; }
+  .brand { padding: 0 4px 12px; margin-bottom: 6px; }
+  .nav { display: flex; gap: 4px; flex-wrap: wrap; padding-top: 2px; }
+  .nav a, .nav button { width: auto; margin: 0; padding: 6px 10px; min-height: 34px; gap: 6px; font-size: 13px; }
+  .nav a[aria-current="page"]::before, .nav button[aria-current="page"]::before { display: none; }
+  .nav-label, .side-foot { display: none; }
+  .topbar { padding: 8px 14px; min-height: 52px; }
+  main { padding: 16px 14px 36px; }
+  .workspace-cover { padding: 20px 18px; min-height: 146px; border-radius: 15px; }
+  .cover-grid { inset: 0 0 0 28%; }
+  .path-label, .path-sep { display: none; }
+  .form-grid, .hq-price-fields { grid-template-columns: 1fr; }
+}
+
+/* ==========================================================================
+   Sales Portal Specific Enhancements
+   ========================================================================== */
+body[data-role="销售"] {
+  --sales-violet: #5438dc;
+  --sales-violet-hover: #4328c4;
+  --sales-lilac: #f1eeff;
+  --sales-border: #d5ccff;
+}
+
+.sales-header {
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.sales-violet, button.sales-violet {
+  background: linear-gradient(180deg, #6347f5 0%, var(--sales-violet) 100%);
+  color: #ffffff;
+  border-color: var(--sales-violet);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24), 0 4px 12px -2px rgba(84, 56, 220, 0.36);
+}
+
+.sales-violet:hover, button.sales-violet:hover {
+  background: linear-gradient(180deg, var(--sales-violet) 0%, var(--sales-violet-hover) 100%);
+  color: #ffffff;
+  border-color: var(--sales-violet-hover);
+}
+
+.sales-perks, button.sales-perks {
+  color: #9a5206;
+  border-color: #fde0b6;
+  background: #fff9f0;
+  box-shadow: none;
+}
+
+.sales-perks:hover, button.sales-perks:hover {
+  background: #fff2dc;
+  border-color: #f9c982;
+  color: #7c3f02;
+}
+
+.sales-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 22px 24px;
+  background:
+    radial-gradient(ellipse at 95% 0%, rgba(99, 71, 245, 0.1), transparent 55%),
+    linear-gradient(135deg, #ffffff 40%, #f8f6ff 100%);
+  border-color: #dfd8ff;
+}
+
+.sales-icon {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  background: linear-gradient(140deg, #6d52ff, var(--sales-violet));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 6px 16px -3px rgba(84, 56, 220, 0.35);
+  color: #ffffff;
+  border-radius: 12px;
+  font-size: 20px;
+}
+
+.sales-icon.soft {
+  background: var(--sales-lilac);
+  border: 1px solid var(--sales-border);
+  box-shadow: none;
+  color: var(--sales-violet);
+  width: 38px;
+  height: 38px;
+  font-size: 17px;
+}
+
+.sales-callout h2 {
+  margin: 0 0 5px;
+  font-size: 17px;
+}
+
+.sales-benefits {
+  display: flex;
+  gap: 10px 20px;
+  flex-wrap: wrap;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--ink-soft);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.sales-benefits li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sales-benefits li::before {
+  content: "✓";
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--green-bg);
+  color: var(--green);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+/* Segmented Control Tabs */
+.sales-tabs {
+  display: inline-flex;
+  gap: 4px;
+  margin: 4px 0 18px;
+  padding: 4px;
+  background: #e9eef7;
+  border-radius: 11px;
+}
+
+.sales-tabs button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  box-shadow: none;
+  padding: 7px 18px;
+  min-height: 34px;
+  border-radius: 8px;
+}
+
+.sales-tabs button:hover {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.sales-tabs button[aria-pressed="true"] {
+  background: #ffffff;
+  color: var(--sales-violet);
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(15, 29, 53, 0.08);
+}
+
+.sales-form {
+  padding: clamp(18px, 2.4vw, 28px);
+}
+
+.sales-form-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.sales-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff9eb;
+  color: #9a4a08;
+  border: 1px solid #fde2b2;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 12px 0 20px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.sales-fields {
+  display: grid;
+  gap: 16px;
+}
+
+.sales-field {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+}
+
+.sales-field label, .sales-label {
+  font-weight: 650;
+  font-size: 13.5px;
+  color: var(--ink);
+}
+
+.sales-field small, .sales-hint {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.sales-required {
+  color: var(--red);
+}
+
+.sales-field input, .sales-field select, .sales-field textarea {
+  width: 100%;
+  min-width: 0;
+}
+
+.sales-industry {
+  padding: 16px 18px;
+  border: 1px solid #dce6f7;
+  background: #f8faff;
+  border-radius: 12px;
+}
+
+.sales-industry .section-head {
+  margin-bottom: 10px;
+}
+
+.sales-two, .sales-industry-selects {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.sales-form-actions {
+  margin-top: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.sales-error {
+  color: var(--red);
+  margin: 8px 0 0;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Wide Wizard & Diagnosis Dialog */
+.sales-dialog {
+  width: min(920px, calc(100% - 28px));
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+}
+
+.sales-dialog #dialogBody {
+  padding: 0;
+}
+
+.sales-dialog-inner {
+  padding: 20px 24px 24px;
+}
+
+.sales-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 8px;
+  margin: 0 0 20px;
+  list-style: none;
+  background: #f3f6fc;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.sales-steps li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  padding: 7px 10px;
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sales-steps b {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  border: 1px solid #d2ddef;
+  background: #ffffff;
+  border-radius: 50%;
+  font-size: 12px;
+}
+
+.sales-steps [aria-current="step"] {
+  background: #ffffff;
+  color: var(--ink);
+  box-shadow: var(--shadow-xs);
+}
+
+.sales-steps [aria-current="step"] b {
+  color: #ffffff;
+  background: var(--sales-violet);
+  border-color: var(--sales-violet);
+}
+
+.sales-wizard-title {
+  margin-bottom: 12px;
+}
+
+/* Interactive Choice Pills */
+.sales-choices {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+.sales-choices legend {
+  font-weight: 650;
+  font-size: 13.5px;
+  margin-bottom: 8px;
+  padding: 0;
+  width: 100%;
+}
+
+.sales-choices label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line-strong);
+  background: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sales-choices label:hover {
+  border-color: var(--sales-violet);
+}
+
+.sales-choices label:has(input:checked) {
+  background: var(--sales-lilac);
+  border-color: var(--sales-violet);
+  color: var(--sales-violet);
+  font-weight: 600;
+}
+
+.sales-choices input {
+  min-height: auto;
+  margin: 0;
+  accent-color: var(--sales-violet);
+}
+
+.sales-chip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.sales-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--sales-lilac);
+  border: 1px solid var(--sales-border);
+  color: var(--sales-violet);
+  border-radius: 8px;
+  padding: 3px 9px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.sales-chip button {
+  min-height: auto;
+  padding: 0 3px;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  color: inherit;
+}
+
+.sales-key-entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 10px;
+  align-items: start;
+}
+
+.sales-key-entry textarea {
+  min-height: 68px;
+}
+
+.sales-wizard-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  margin-top: 18px;
+}
+
+.sales-number {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  color: var(--sales-violet);
+  background: var(--sales-lilac);
+  margin-right: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+/* Follow-up Orders Filter Card & Sticky Table */
+#sales-order-query {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  margin-bottom: 18px;
+  box-shadow: var(--shadow-sm);
+}
+
+.sales-order-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(156px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.sales-order-search {
+  display: flex;
+  gap: 10px;
+  max-width: 600px;
+  margin-bottom: 0;
+}
+
+.sales-order-search input {
+  flex: 1;
+  min-width: 0;
+}
+
+.sales-order-head, .sales-order-group summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 0.9fr) minmax(0, 0.65fr);
+  gap: 12px;
+  align-items: center;
+  padding: 13px 18px 13px 38px;
+}
+
+.sales-order-head {
+  background: #f5f8fc;
+  color: #51647f;
+  font-size: 12px;
+  font-weight: 650;
+  border-bottom: 1px solid var(--line);
+}
+
+.sales-order-group summary {
+  position: relative;
+}
+
+.sales-order-group summary::before {
+  position: absolute;
+  left: 18px;
+}
+
+.sales-order-group table {
+  min-width: 1240px;
+}
+
+.sales-order-group td:nth-child(2) {
+  min-width: 120px;
+  max-width: 200px;
+}
+
+.sales-order-group td:nth-child(3), .sales-order-group td:nth-child(9) {
+  white-space: nowrap;
+}
+
+.sales-order-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.sales-order-actions button, .sales-order-actions a {
+  min-height: 28px;
+  padding: 4px 8px;
+  font-size: 12px;
+  border-radius: 7px;
+  box-shadow: none;
+}
+
+.sales-order-actions .apply-pwd, button.apply-pwd {
+  color: #ffffff;
+  border-color: #1664ff;
+  background: linear-gradient(135deg, #2563eb, #1664ff);
+  font-weight: 650;
+}
+
+.sales-order-actions .apply-pwd:hover, button.apply-pwd:hover {
+  background: linear-gradient(135deg, #1d4ed8, #1456db);
+  border-color: #1456db;
+  color: #ffffff;
+}
+
+.sales-order-actions .reset-order, button.reset-order {
+  color: #b45309;
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+
+.sales-order-actions .reset-order:hover, button.reset-order:hover {
+  background: #fef3c7;
+  border-color: #fcd34d;
+  color: #92400e;
+}
+
+.otp-warn-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-left: 4px solid #f59e0b;
+  color: #92400e;
+  font-size: 13px;
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+
+.otp-cred-card {
+  border-radius: 14px;
+  border: 1px solid #bfdbfe;
+  background: linear-gradient(180deg, #f8fbff 0%, #eff6ff 100%);
+  padding: 16px 18px;
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.otp-cred-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.otp-cred-row code {
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  user-select: all;
+}
+
+.otp-pass-box {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1.5px dashed #3b82f6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.otp-pass-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #1d4ed8;
+  user-select: all;
+}
+
+.otp-once-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #b45309;
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.sales-order-group .customer-orders {
+  padding: 0;
+}
+
+.sales-order-group .customer-orders .scroll {
+  border: 0;
+  border-radius: 0;
+}
+
+.sales-order-group th:last-child, .sales-order-group td:last-child {
+  position: sticky;
+  right: 0;
+  background: #fafcff;
+  box-shadow: -4px 0 12px rgba(15, 29, 53, 0.05);
+}
+
+.sales-order-group tbody tr:hover td:last-child {
+  background: #f2f7ff;
+}
+
+@media (max-width: 720px) {
+  .sales-two, .sales-industry-selects { grid-template-columns: 1fr; }
+  .sales-dialog-inner, .sales-dialog > .section-head { padding: 14px; }
+  .sales-steps li { font-size: 11.5px; gap: 4px; padding: 5px 6px; }
+  .sales-steps b { width: 20px; height: 20px; }
+  .sales-key-entry { grid-template-columns: 1fr 1fr; }
+  .sales-key-entry textarea { grid-column: 1 / -1; }
+  .sales-order-group th:last-child, .sales-order-group td:last-child { position: static; box-shadow: none; }
+  .sales-order-head, .sales-order-group summary { gap: 6px; grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.8fr) auto; }
+}
+
+/* Visual Presales Report & Baseline Results */
+.report-hero-banner {
+  background: radial-gradient(ellipse at 88% 18%, rgba(99, 71, 245, 0.42), transparent 56%),
+              linear-gradient(118deg, #09162c 0%, #13284c 60%, #1d2b64 100%);
+  color: #ffffff;
+  border-radius: 14px;
+  padding: 20px 22px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.report-hero-banner h3 { color: #ffffff; font-size: 19px; margin: 4px 0 6px; }
+.report-hero-banner p { color: #c4d5f2; font-size: 12.5px; }
+.report-score-box {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 10px 16px;
+  text-align: right;
+  backdrop-filter: blur(8px);
+}
+.report-score-box strong { display: block; font-size: 28px; line-height: 1.15; color: #7dd3fc; font-variant-numeric: tabular-nums; }
+.report-score-box small { color: #cbd5e1; font-size: 11px; }
+.report-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.report-kpi-card {
+  background: #f8fafd;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 12px 14px;
+}
+.report-kpi-card span { display: block; font-size: 12px; color: var(--muted); }
+.report-kpi-card b { display: block; font-size: 21px; margin: 4px 0 2px; color: var(--ink); font-variant-numeric: tabular-nums; }
+.report-kpi-card small { font-size: 11px; color: var(--subtle); }
+.report-grid-two {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.report-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 15px 16px;
+  background: #ffffff;
+}
+.report-card h4 { margin: 0 0 12px; font-size: 14px; color: var(--ink); display: flex; justify-content: space-between; align-items: center; }
+.rival-row { margin-bottom: 11px; }
+.rival-row:last-child { margin-bottom: 0; }
+.rival-meta { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 5px; }
+.rival-bar { height: 8px; border-radius: 999px; background: #edf2f9; overflow: hidden; }
+.rival-bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #5438dc, #38bdf8); }
+.rival-bar.muted-bar i { background: #94a3b8; }
+.opp-list { display: grid; gap: 9px; margin: 0; padding: 0; list-style: none; }
+.opp-list li {
+  padding: 10px 12px;
+  border-radius: 9px;
+  background: #f8faff;
+  border: 1px solid #e1ebfa;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.opp-list li b { display: block; color: var(--ink); margin-bottom: 2px; }
+@media (max-width: 720px) {
+  .report-kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .report-grid-two { grid-template-columns: 1fr; }
+}
+
+</style>
+<link rel="stylesheet" href="./admin-theme-pro.css">
+<link rel="stylesheet" href="./sales-pro.css">
+</head>
+<body data-role="销售">
+<div class="layout">
+  <aside class="sidebar">
+    <a class="brand" href="#overview"><span class="mark" id="brandMark" aria-hidden="true">青</span><span><b id="brand">青屿增长</b><small>销售系统</small></span></a>
+    <nav id="nav" class="nav" aria-label="主导航"></nav>
+    <div class="side-foot"><div><span class="side-avatar" id="accountMark" aria-hidden="true">管</span><span><b id="account"></b><small>已登录</small></span></div></div>
+  </aside>
+  <div>
+    <header class="topbar"><span class="path"><span class="path-label">销售系统</span><span class="path-sep" aria-hidden="true">›</span><b id="crumb"></b></span><div id="toolbar" class="actions"></div></header>
+    <main id="main"></main>
+  </div>
+</div>
+<dialog id="dialog" aria-labelledby="dialogTitle">
+  <div class="section-head"><h2 id="dialogTitle"></h2><form method="dialog"><button aria-label="关闭"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></form></div>
+  <div id="dialogBody"></div>
+</dialog>
+<div id="toast" class="toast" role="status" hidden></div>
+<script>
+const $ = selector => document.querySelector(selector);
+const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+const badge = (label, color = '') => `<span class="badge ${color}">${esc(label)}</span>`;
+const metric = (label, value, detail) => `<article class="metric"><span>${esc(label)}</span><strong>${esc(value)}</strong><small>${esc(detail)}</small></article>`;
+const NAV_ICONS = {
+  overview: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
+  partners: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  customers: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/><path d="M9 9h2m2 0h2M9 13h2m2 0h2M9 17h6"/></svg>',
+  orders: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>',
+  billing: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg>',
+  sales: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>',
+  optimizers: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9Z"/><path d="M19 16l.9 2.1L22 19l-2.1.9L19 22l-.9-2.1L16 19l2.1-.9Z"/></svg>',
+  operations: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+  brand: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.93 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-1 0-.83.67-1.5 1.5-1.5H16c3.31 0 6-2.69 6-6 0-4.96-4.49-9-10-9z"/></svg>',
+  projects: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="9" x2="17" y2="9"/><line x1="7" y1="13" x2="17" y2="13"/><line x1="7" y1="17" x2="12" y2="17"/></svg>',
+  detection: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>',
+  keywords: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 2.4 5.6L20 10l-5.6 2.4L12 18l-2.4-5.6L4 10l5.6-2.4Z"/><path d="M19 16l1 2 2 1-2 1-1 2-1-2-2-1 2-1Z"/></svg>',
+  baseline: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/><path d="m15 9-3 3"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>',
+  diagnosis: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>'
+};
+const navGlyph = (id, fallback) => NAV_ICONS[id] || fallback;
+const formatCell = cell => typeof cell === 'string' && cell.includes('\u3000') ? `<div class="cell-actions">${cell.replaceAll('\u3000','')}</div>` : cell;
+const table = (head, rows) => `<div class="scroll"><table><thead><tr>${head.map(h=>`<th scope="col">${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.length ? rows.map(row=>`<tr>${row.map(cell=>`<td>${formatCell(cell)}</td>`).join('')}</tr>`).join('') : `<tr><td colspan="${head.length}" class="empty">没有符合条件的记录</td></tr>`}</tbody></table></div>`;
+const options = (values, current = '') => values.map(value=>`<option${value===current?' selected':''}>${esc(value)}</option>`).join('');
+const details = items => `<dl>${items.map(([key,value])=>`<dt>${esc(key)}</dt><dd>${esc(value)}</dd>`).join('')}</dl>`;
+const section = (title, action = '') => `<div class="section-head"><h2>${esc(title)}</h2>${action}</div>`;
+function load(key, fallback) {
+  try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; }
+}
+function save(key, data) {
+  try { localStorage.setItem(key, JSON.stringify(data)); return true; } catch { return false; }
+}
+let toastTimer;
+function toast(message) {
+  $('#toast').textContent = message;
+  $('#toast').hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>$('#toast').hidden=true, 2800);
+}
+function modal(title, body) {
+  $('#dialogTitle').textContent = title;
+  $('#dialogBody').innerHTML = body;
+  $('#dialog').showModal();
+}
+function paintNav(groups, current) {
+  $('#nav').innerHTML = groups.map(([label, items])=>`<div class="nav-label">${esc(label)}</div>`+
+    items.map(([id, icon, text])=>`<a href="#${id}" ${id===current?'aria-current="page"':''}><i aria-hidden="true">${navGlyph(id, icon)}</i>${esc(text)}</a>`).join('')).join('');
+}
+
+// 修改下方的示例数据和页面逻辑即可自定义本原型。
+const orderVersions = ['工具版','服务版'];
+function orderVersion(value) {
+  if (value==='GEO 监测版' || value==='标准版') return '工具版';
+  if (value==='GEO 增长版') return '服务版';
+  return orderVersions.includes(value) ? value : '—';
+}
+// Shared example data for headquarters, agency and staff previews.
+const tenantFixtures = {
+  'OEM-001': {
+    brand:'青屿增长', color:'#2558dc',
+    people:[
+      {name:'陈乔',role:'销售',team:'行业客户组',status:'在职'}, {name:'林佳',role:'销售',team:'渠道客户组',status:'在职'},
+      {name:'许澄',role:'优化师',team:'工业制造',status:'在职'}, {name:'周言',role:'优化师',team:'消费与服务',status:'在职'},
+      {name:'宋知',role:'优化师',team:'企业软件',status:'在职'}
+    ],
+    orders:[
+      {id:'GEO-261107',customer:'远山智能',industry:'工业制造',package:'服务版',amount:19800,sales:'陈乔',owner:'许澄',service:'优化中',rank:'在榜',start:'2026-11-01',end:'2027-01-29',renewal:'待联系',published:12,note:'覆盖工业视觉检测与外观质检场景。'},
+      {id:'GEO-261105',customer:'星海精密',industry:'工业制造',package:'服务版',amount:19800,sales:'陈乔',owner:'',service:'待派单',rank:'暂无监测数据',start:'2026-11-16',end:'2027-02-14',renewal:'待联系',published:0,note:'新建服务版订单，待分配优化师。'},
+      {id:'GEO-261104',customer:'知禾软件',industry:'企业软件',package:'工具版',amount:9800,sales:'林佳',owner:'',service:'使用中',rank:'在榜',start:'2026-11-14',end:'2027-02-11',renewal:'待联系',published:8,note:'工具版客户自助运营，已开通账号。'},
+      {id:'GEO-261098',customer:'木石家居',industry:'家居建材',package:'服务版',amount:19800,sales:'陈乔',owner:'周言',service:'优化中',rank:'掉榜',start:'2026-10-14',end:'2027-01-11',renewal:'待联系',published:7,note:'优先复测全屋定制相关问题。'},
+      {id:'GEO-261082',customer:'新桥门窗',industry:'家居建材',package:'服务版',amount:19800,sales:'林佳',owner:'周言',service:'已交付',rank:'在榜',start:'2026-09-16',end:'2026-12-15',renewal:'跟进中',published:16,note:'已发送阶段报告，约本周沟通续费。'},
+      {id:'GEO-261075',customer:'澄川智造',industry:'工业制造',package:'工具版',amount:9800,sales:'陈乔',owner:'',service:'使用中',rank:'未上榜',start:'2026-09-09',end:'2026-12-08',renewal:'待联系',published:14,note:'工具版客户自助使用，跟单销售持续跟进。'},
+      {id:'GEO-261070',customer:'远山智能',industry:'工业制造',package:'工具版',amount:9800,sales:'陈乔',owner:'',service:'已交付',rank:'在榜',start:'2026-08-01',end:'2026-10-29',renewal:'已续费',published:10,note:'首期品牌监测与基线报告。'}
+    ]
+  },
+  'OEM-002': {
+    brand:'海港增长', color:'#236395',
+    people:[
+      {name:'姚琪',role:'销售',team:'工业品牌组',status:'在职'},
+      {name:'梁越',role:'优化师',team:'B2B 交付',status:'在职'}
+    ],
+    orders:[
+      {id:'GEO-261092',customer:'恒拓精密',industry:'仪器制造',package:'服务版',amount:19800,sales:'姚琪',owner:'梁越',service:'优化中',rank:'在榜',start:'2026-10-15',end:'2027-01-13',renewal:'待联系',published:9,note:'工业传感器全案 GEO 优化服务。'},
+      {id:'GEO-261091',customer:'澜桥仪器',industry:'仪器制造',package:'工具版',amount:9800,sales:'姚琪',owner:'',service:'使用中',rank:'在榜',start:'2026-10-01',end:'2026-12-29',renewal:'待联系',published:4,note:'工具版客户自助使用中。'}
+    ]
+  },
+  'OEM-003': {
+    brand:'北辰 GEO', color:'#554ed5',
+    people:[
+      {name:'江禾',role:'销售',team:'企业客户组',status:'在职'},
+      {name:'唐宁',role:'优化师',team:'软件与服务',status:'在职'}
+    ],
+    orders:[
+      {id:'GEO-261086',customer:'松石科技',industry:'企业软件',package:'服务版',amount:19800,sales:'江禾',owner:'唐宁',service:'已交付',rank:'在榜',start:'2026-09-10',end:'2026-12-08',renewal:'跟进中',published:9,note:'已完成本期内容交付。'}
+    ]
+  }
+};
+const demoDay = '2026-11-17';
+const statuses = ['待派单','待启动','优化中','使用中','已交付'];
+const ranks = ['暂无监测数据','在榜','掉榜','未上榜'];
+const colors = {'待派单':'amber','待启动':'amber','优化中':'blue','使用中':'blue','已交付':'green','在榜':'green','掉榜':'red','跟进中':'blue','待联系':'amber','已续费':'green','在职':'green'};
+const groups = [
+  ['经营管理',[['overview','◈','经营看板'],['customers','◫','客户管理'],['sales','◎','销售管理']]],
+  ['服务交付',[['optimizers','◇','优化师管理'],['operations','⌁','交付与监测']]],
+  ['平台设置',[['brand','⚙','OEM 品牌设置']]]
+];
+const portalRole = document.body.dataset.role || '';
+const portalPage = portalRole==='销售' ? 'sales' : 'optimizers';
+const portalParams = new URLSearchParams(location.search);
+const requestedTenant = portalParams.get('tenant');
+const tenantId = requestedTenant && /^OEM-\d{3,}$/.test(requestedTenant) ? requestedTenant : 'OEM-001';
+const tenantName = !portalRole ? portalParams.get('agency') : '';
+const tenantStatus = !portalRole ? portalParams.get('state') : '';
+const hqPreview = !portalRole && Boolean(tenantName) && portalParams.get('entry')==='hq';
+const storageKey = tenantId==='OEM-001' ? 'geo-oem-partner-v9' : 'geo-oem-partner-v9-'+tenantId;
+const initial = tenantFixtures[tenantId] || {brand:tenantName||'代理商',color:'#1664ff',people:[],orders:[]};
+function portalSnapshot() {
+  try {
+    const snapshot = JSON.parse(decodeURIComponent(location.hash.slice(1)));
+    if (snapshot.person?.role===portalRole && snapshot.person.name===portalParams.get('account') && Array.isArray(snapshot.orders)) return snapshot;
+  } catch {}
+  return null;
+}
+const snapshot = portalRole ? portalSnapshot() : null;
+const savedBoot = load(storageKey, null);
+const allInitialSellers = (savedBoot?.people || initial.people).filter(p=>p.role==='销售');
+let portalAccount = portalParams.get('account') || snapshot?.person.name || allInitialSellers[0]?.name || '陈乔';
+const tenantSuffix = tenantId==='OEM-001' ? '' : '-'+tenantId;
+const portalCacheKey = 'geo-oem-account-'+portalRole+'-'+portalAccount+tenantSuffix;
+const data = { brand: initial.brand, color: initial.color, people: [], orders: [], allSellers: [] };
+function syncLivePartnerOrders() {
+  const live = load(storageKey, null) || initial;
+  let hqPartner = null;
+  try {
+    const hqList = JSON.parse(localStorage.getItem('geo-oem-hq-v9') || 'null');
+    if (Array.isArray(hqList)) hqPartner = hqList.find(x => x.id === tenantId) || null;
+  } catch {}
+  data.brand = hqPartner?.brand || live.brand || snapshot?.brand || initial.brand;
+  data.color = hqPartner?.color || live.color || snapshot?.color || initial.color;
+  data.allSellers = (live.people || initial.people).filter(p=>p.role==='销售');
+  if (!data.allSellers.some(p=>p.name===portalAccount) && data.allSellers.length) {
+    portalAccount = data.allSellers[0].name;
+  }
+  const person = data.allSellers.find(p=>p.name===portalAccount) || snapshot?.person || {name:portalAccount,role:'销售',team:'行业客户组',status:'在职'};
+  data.people = [person];
+  const allOrders = (live.orders || initial.orders).map(o => ({
+    ...o,
+    owner: orderVersion(o.package)==='工具版' ? '' : o.owner
+  }));
+  data.orders = allOrders.filter(o => o.sales === portalAccount);
+  const changes = load('geo-oem-account-'+portalRole+'-'+portalAccount+tenantSuffix, {});
+  data.orders.forEach(o=>{ if (changes[o.id]) Object.assign(o,changes[o.id]); });
+}
+syncLivePartnerOrders();
+const people = role => data.people.filter(p=>p.role===role);
+const money = number => '¥'+Number(number).toLocaleString('zh-CN');
+const tag = value => badge(value,colors[value]);
+const btn = (action,label,id='',primary=false) => `<button class="${primary?'primary':'link-button'}" data-action="${action}" data-id="${esc(id)}">${label}</button>`;
+const link = (page,label) => `<a class="button" href="#${page}">${label} →</a>`;
+const heading = (title,description='',action='') => `<div class="intro"><div><h1>${title}</h1>${description?`<p class="muted">${description}</p>`:''}</div>${action}</div>`;
+const active = order => ['待启动','优化中'].includes(order.service);
+const foot = count => `<div class="table-foot">共 ${count} 条记录</div>`;
+const sampleOrder = () => data.orders.find(o=>o.id==='GEO-261107') || data.orders[0];
+function cover(title,kicker,description,action='') {
+  return `<section class="workspace-cover" id="workspace-top"><span class="cover-grid" aria-hidden="true"></span>
+    <div class="cover-copy"><div class="cover-label">${esc(kicker)}</div><h1>${esc(title)}</h1>
+      <p>${esc(description)}</p>${action ? `<div class="cover-action">${action}</div>` : ''}</div></section>`;
+}
+function preview(order=sampleOrder(),compact=false,forcedEdition='') {
+  const ver = forcedEdition || (order ? (orderVersion(order.package)==='工具版' ? 'tool' : 'service') : 'service');
+  const isTool = ver === 'tool';
+  const cfg = (data.portalConfigs && data.portalConfigs[ver]) || {brand:data.brand,color:data.color};
+  const params = new URLSearchParams({tenant:tenantId,brand:cfg.brand||data.brand,color:cfg.color||data.color,version:ver});
+  if (!isTool) params.set('svcRole', 'client');
+  if (order) Object.entries({order:order.id,project:order.customer,industry:order.industry,status:order.service,start:order.start,end:order.end,published:order.published,plan:orderVersion(order.package),rank:order.rank}).forEach(([key,value])=>params.set(key,value));
+  const targetFile = isTool ? './client-tool.html' : './client.html';
+  const hash = '#report';
+  const label = compact ? (isTool ? '工具版·客户端 ↗' : '服务版·客户端 ↗') : (isTool ? '预览工具版·客户端 ↗' : '预览服务版·客户端 ↗');
+  return `<a class="${compact ? 'order-preview' : 'button'}" target="_blank" rel="noopener" href="${targetFile}?${esc(params.toString())}${hash}">${label}</a>`;
+}
+function overview() {
+  const unassigned = data.orders.filter(o=>o.service==='待派单');
+  const dropped = data.orders.filter(o=>o.rank==='掉榜');
+  const stats = [
+    metric('客户企业', new Set(data.orders.map(o=>o.customer)).size,'按企业去重'),
+    metric('累计订单金额',money(data.orders.reduce((sum,o)=>sum+o.amount,0)),`${data.orders.length} 笔示例订单`),
+    metric('待派单',unassigned.length,'等待分配优化师'),
+    metric('在手交付',data.orders.filter(active).length,'待启动及优化中')
+  ];
+  const todos = [
+    ['待分配优化师',unassigned.length,'customers','处理订单'],
+    ['掉榜待复测',dropped.length,'operations','查看监测']
+  ];
+  const progress = statuses.map(s=>{
+    const count = data.orders.filter(o=>o.service===s).length;
+    return `<div class="list-row"><div style="flex:1"><div class="section-head" style="margin-bottom:5px"><span>${s}</span><b>${count}</b></div>
+      <div class="bar"><i style="width:${count/(data.orders.length||1)*100}%"></i></div></div></div>`;
+  }).join('');
+  const context = tenantName ? tenantName+' · '+tenantId+(tenantStatus?' · '+tenantStatus:'') : 'GEO · 代理商工作台';
+  return cover('经营看板',context,'查看订单、交付进度和待办事项。',btn('add-order','＋ 新建订单','',true))+
+    `<div class="metrics">${stats.join('')}</div><div class="split">
+    <section class="panel pad">${section('服务状态分布',link('customers','客户管理'))}${progress}</section>
+    <section class="panel pad">${section('待办事项')}${todos.map(([name,count,page,label])=>`<div class="list-row"><div><b>${name}</b><small>${count} 项</small></div>${link(page,label)}</div>`).join('')}</section>
+    </div><section class="panel"><div class="pad"><h2>近期订单</h2></div>${orderTable(data.orders.slice(0,4))}</section>`;
+}
+function orderTable(orders,grouped=false) {
+  return table([grouped?'订单编号':'客户 / 订单编号','订单版本','状态','跟单销售','优化师','服务周期','榜单','订单金额','操作'],
+    orders.map(o=>{
+      const svc = orderVersion(o.package)==='服务版';
+      const ownerCell = svc ? (o.owner ? `<b>${esc(o.owner)}</b>` : badge('待分配优化师','amber')) : '<span class="muted">客户自助</span>';
+      return [
+        grouped ? `<b>${esc(o.id)}</b>` : `<b>${esc(o.customer)}</b><br><small>${esc(o.id)}</small>`,
+        badge(orderVersion(o.package), svc?'blue':'green'),
+        tag(o.service),
+        `<b>${esc(o.sales)}</b>`,
+        ownerCell,
+        `<small style="white-space:nowrap">${esc(o.start)}<br>至 ${esc(o.end)}</small>`,
+        tag(o.rank),
+        money(o.amount),
+        btn('order','查看详情',o.id)+'　'+preview(o,true)
+      ];
+    }));
+}
+const customerFilterDefaults = {search:'',service:'全部服务状态',seller:'全部销售',version:'全部订单版本'};
+const customerFilters = {...customerFilterDefaults};
+const expandedCustomers = new Set(data.orders.slice(0,1).map(o=>o.customer));
+function customers() {
+  return heading('客户管理','展开客户查看名下订单，可按服务状态或销售筛选。',btn('add-order','＋ 新建订单','',true))+
+    `<section class="panel"><div class="filters">
+    <input id="customerSearch" type="search" value="${esc(customerFilters.search)}" placeholder="搜索客户、行业或订单编号" aria-label="搜索客户或订单">
+    <select id="service" aria-label="服务状态">${options(['全部服务状态',...statuses],customerFilters.service)}</select>
+    <select id="version" aria-label="订单版本">${options(['全部订单版本',...orderVersions],customerFilters.version)}</select>
+    <select id="seller" aria-label="销售">${options(['全部销售',...people('销售').map(p=>p.name)],customerFilters.seller)}</select>
+    <button data-action="clear-customers">重置</button></div><div id="customerResults"></div></section>`;
+}
+function customerFilterActive() {
+  return Boolean(customerFilters.search.trim() || customerFilters.service!=='全部服务状态' || customerFilters.seller!=='全部销售' || customerFilters.version!=='全部订单版本');
+}
+function filterCustomers() {
+  const term = customerFilters.search.trim().toLowerCase();
+  const groups = Map.groupBy(data.orders,order=>order.customer);
+  const cards = [];
+  let matches = 0;
+  for (const [name,all] of groups) {
+    const visible = all.filter(o=>[o.customer,o.industry,o.id,o.note].some(v=>v.toLowerCase().includes(term)) &&
+      (customerFilters.service==='全部服务状态'||o.service===customerFilters.service) &&
+      (customerFilters.seller==='全部销售'||o.sales===customerFilters.seller) &&
+      (customerFilters.version==='全部订单版本'||orderVersion(o.package)===customerFilters.version));
+    if (!visible.length) continue;
+    matches += visible.length;
+    const sales = [...new Set(all.map(o=>o.sales))].join('、');
+    const orderCount = visible.length===all.length ? all.length+' 笔订单' : '显示 '+visible.length+' / '+all.length+' 笔订单';
+    cards.push(`<details class="customer-group" data-customer="${esc(name)}" ${customerFilterActive()||expandedCustomers.has(name)?'open':''}>
+      <summary><span><b>${esc(name)}</b><small>${esc(all[0].industry)} · 归属销售 ${esc(sales)}</small></span>
+        ${badge(orderCount,'blue')}</summary>
+      <div class="customer-orders">
+        <div class="section-head"><h2>客户订单</h2>${btn('add-order','＋ 为该客户新增订单',name)}</div>
+        ${orderTable(visible,true)}
+      </div></details>`);
+  }
+  $('#customerResults').innerHTML = (cards.join('') || '<div class="empty">没有符合条件的客户或订单</div>')+
+    `<div class="table-foot">共 ${cards.length} 个客户 · ${matches} 笔订单</div>`;
+}
+document.addEventListener('toggle',event=>{
+  const group = event.target;
+  if (!group.isConnected || !group.matches('details.customer-group') || customerFilterActive()) return;
+  if (group.open) expandedCustomers.add(group.dataset.customer);
+  else expandedCustomers.delete(group.dataset.customer);
+},true);
+function staff(role) {
+  const sales = role==='销售';
+  const rows = people(role).map(p=>{
+    const orders = data.orders.filter(o=>(sales?o.sales:o.owner)===p.name);
+    const account = accountLink(sales ? 'sales' : 'optimizers',p.name);
+    return [`<a href="${account}" target="_blank" rel="noopener"><b>${esc(p.name)}</b></a>`,esc(p.team),tag(p.status),orders.length,
+      sales?money(orders.reduce((sum,o)=>sum+o.amount,0)):orders.filter(active).length,
+      `<a href="${account}" target="_blank" rel="noopener">进入账号 →</a>　`+btn('edit-person','编辑',p.name)];
+  });
+  return heading(sales?'销售管理':'优化师管理',sales?'查看销售归属、订单金额和跟进情况。':'维护优化师名单，查看在手订单和任务负载。',
+    btn(sales?'add-sales':'add-optimizer','＋ 新增'+role,'',true))+
+    `<section class="panel">${table([role,sales?'团队':'擅长领域','成员状态','关联订单',sales?'累计订单金额':'在手订单','操作'],rows)}${foot(rows.length)}</section>`;
+}
+function accountLink(page,name) {
+  const person = data.people.find(p=>p.name===name);
+  const orders = data.orders.filter(o=>(page==='sales'?o.sales:o.owner)===name);
+  const snapshot = JSON.stringify({person,orders,brand:data.brand,color:data.color});
+  const file = page==='sales' ? 'sales.html' : 'optimizer.html';
+  return './'+file+'?'+esc(new URLSearchParams({account:name,...(tenantId==='OEM-001'?{}:{tenant:tenantId})}).toString())+
+    '#'+encodeURIComponent(snapshot).replace(/'/g,'%27');
+}
+function staffAccount(page,name) {
+  const sales = page==='sales';
+  const role = sales ? '销售' : '优化师';
+  const person = people(role).find(p=>p.name===name);
+  const returnLink = portalRole ? '' : `<a class="button" href="#${page}">← 返回${role}列表</a>`;
+  if (!person) return heading('账号不存在','请从人员列表选择账号。',returnLink);
+  const assigned = data.orders.filter(o=>(sales?o.sales:o.owner)===name);
+  const published = assigned.reduce((sum,o)=>sum+o.published,0);
+  const q = sales ? accGetSellerQuota(tenantId, name) : null;
+  const rates = sales ? accGetHqRates(tenantId) : null;
+  const stats = sales ? [
+    metric('跟进客户',new Set(assigned.map(o=>o.customer)).size,'按企业去重'),
+    metric('我的跟单订单',assigned.length,'服务版 + 工具版'),
+    metric('服务版 / 工具版',`${assigned.filter(o=>orderVersion(o.package)==='服务版').length} / ${assigned.filter(o=>orderVersion(o.package)==='工具版').length}`,'按版本分布'),
+    metric('进行中订单',assigned.filter(o=>['待派单','待启动','优化中','使用中'].includes(o.service)).length,'服务与工具使用中')
+  ] : [
+    metric('在手项目',assigned.filter(active).length,'待启动及优化中'),
+    metric('累计发布',published+' 篇','该优化师负责的订单'),
+    metric('掉榜待复测',assigned.filter(o=>o.rank==='掉榜').length,'当前榜单异常'),
+    metric('已交付',assigned.filter(o=>o.service==='已交付').length,'已完成服务')
+  ];
+  const summary = cover(name+' · '+role,portalRole?'GEO · '+role+'系统':'GEO · 账号预览',
+    person.team+' · '+person.status,returnLink);
+  const quotaCards = sales ? `<section class="panel pad" style="margin-bottom:18px">
+    <div class="section-head"><h2>本月售前额度</h2><small class="muted">余额 <b>¥${accGetBalance(tenantId).toLocaleString('zh-CN',{minimumFractionDigits:2})}</b></small></div>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+      <div style="padding:12px 14px;border-radius:11px;border:1px solid var(--line);background:#f8fbff;display:flex;justify-content:space-between;align-items:center;gap:8px">
+        <div><small style="color:var(--muted)">选词工具</small><div style="font-size:17px;font-weight:750;margin-top:2px">${q.keywords.used} / ${q.keywords.limit} 次</div></div>
+        <button class="link-button" data-work-view="keywords">去选词 →</button>
+      </div>
+      <div style="padding:12px 14px;border-radius:11px;border:1px solid var(--line);background:#f8fbff;display:flex;justify-content:space-between;align-items:center;gap:8px">
+        <div><small style="color:var(--muted)">售前基线测算</small><div style="font-size:17px;font-weight:750;margin-top:2px">${q.baseline.used} / ${q.baseline.limit} 次</div></div>
+        <button class="link-button" data-work-view="baseline">去测算 →</button>
+      </div>
+      <div style="padding:12px 14px;border-radius:11px;border:1px solid var(--line);background:#f8fbff;display:flex;justify-content:space-between;align-items:center;gap:8px">
+        <div><small style="color:var(--muted)">售前报告</small><div style="font-size:17px;font-weight:750;margin-top:2px">${q.diagnosis.used} / ${q.diagnosis.limit} 份</div></div>
+        <button class="link-button" data-work-view="diagnosis">去生成 →</button>
+      </div>
+    </div>
+  </section>` : '';
+  const ordersPanel = `<section class="panel portal-section" id="workspace-orders"><div class="pad">${section(sales?'我的跟单订单':'我的优化项目', sales?'<button class="link-button" data-work-view="orders">全部跟进订单 →</button>':'')}</div>
+    ${sales ? orderTable(assigned) : table(['客户 / 订单编号','服务状态','榜单','累计发布','操作'],assigned.map(o=>
+      [`<b>${esc(o.customer)}</b><br><small>${esc(o.id)}</small>`,tag(o.service),tag(o.rank),o.published+' 篇',
+      btn('order','查看详情',o.id)+'　'+btn('edit-order','更新交付',o.id)+'　'+preview(o,true)]))}${foot(assigned.length)}</section>`;
+  return summary+`<div class="metrics">${stats.join('')}</div>`+quotaCards+ordersPanel;
+}
+function operations() {
+  const list = data.orders.filter(o=>o.owner);
+  const published = list.reduce((sum,o)=>sum+o.published,0);
+  return heading('交付与监测','按订单查看优化师、已发布内容和榜单异常。')+
+    `<div class="metrics">${metric('在手交付',list.filter(active).length,'待启动及优化中')}
+    ${metric('已发布内容',published,'按订单统计')}${metric('当前掉榜',list.filter(o=>o.rank==='掉榜').length,'待复测订单')}
+    ${metric('已交付',list.filter(o=>o.service==='已交付').length,'已完成服务')}</div>
+    <section class="panel"><div class="filters"><label>榜单状态 <select id="opRank">${options(['全部榜单状态',...ranks])}</select></label></div><div id="opResults"></div></section>`;
+}
+function filterOperations() {
+  const rank = $('#opRank').value;
+  const rows = data.orders.filter(o=>o.owner&&(rank==='全部榜单状态'||rank===o.rank));
+  $('#opResults').innerHTML = table(['客户','优化师','服务状态','榜单','累计发布','操作'],rows.map(o=>
+    [esc(o.customer),esc(o.owner),tag(o.service),tag(o.rank),o.published+' 篇',btn('order','查看详情',o.id)+'　'+btn('edit-order','更新交付',o.id)+'　'+preview(o,true)]))+foot(rows.length);
+}
+function brandPage() {
+  return heading('OEM 品牌设置','配置客户工作台的品牌名和主题色。',preview())+
+    `<section class="panel pad">${section('品牌信息')}<form id="brandForm"><div class="form-grid">
+    <label>品牌名称<input name="brand" maxlength="24" value="${esc(data.brand)}" required></label>
+    <label>主题色<input type="color" name="color" value="${esc(data.color)}"></label>
+    </div><button class="primary">保存品牌</button></form></section>`;
+}
+const pages = {overview,customers,sales:()=>staff('销售'),optimizers:()=>staff('优化师'),operations,brand:brandPage};
+function currentView() {
+  if (portalRole) return {page:portalPage,account:portalAccount};
+  let [id,query] = location.hash.slice(1).split('?');
+  if (id==='orders') { id='customers'; history.replaceState(null,'','#customers'); }
+  if (id==='renewals') history.replaceState(null,'','#overview');
+  const page = Object.hasOwn(pages,id) ? id : 'overview';
+  const account = ['sales','optimizers'].includes(page) ? new URLSearchParams(query).get('account') : null;
+  return {page,account};
+}
+let portalView = ['keywords','baseline','diagnosis','orders'].includes(portalParams.get('view')) ? portalParams.get('view') : 'keywords';
+function portalButton(id,glyph,label) {
+  return `<button data-work-view="${id}" ${portalView===id?'aria-current="page"':''}><i aria-hidden="true">${navGlyph(id, glyph)}</i>${esc(label)}</button>`;
+}
+function render() {
+  syncLivePartnerOrders();
+  const {page,account} = currentView();
+  if (portalRole) {
+    const sales = portalRole==='销售';
+    $('#nav').innerHTML = sales ?
+      salesNavigation.map(([name,items])=>`<div class="nav-label">${esc(name)}</div>`+
+        items.map(([id,glyph,label])=>portalButton(id,glyph,label)).join('')).join('') :
+      `<div class="nav-label">项目交付</div>${portalButton('projects','▤','我的优化项目')}${portalButton('detection','⌁','在榜/掉榜检测')}`;
+  } else paintNav(groups,page);
+  const portalTitle = portalRole==='销售' ? salesTitles[portalView] :
+    ({detection:'在榜/掉榜检测',projects:'我的优化项目'})[portalView];
+  $('#crumb').textContent = portalRole ? (portalTitle || '选词工具') : groups.flatMap(g=>g[1]).find(item=>item[0]===page)[2];
+  $('#brand').textContent = data.brand;
+  document.title = data.brand+(portalRole?' · '+portalRole+'系统':' · 代理商后台');
+  if (data.color) {
+    document.documentElement.style.setProperty('--tenant-color', data.color);
+    document.documentElement.style.setProperty('--blue', data.color);
+  }
+  $('#brandMark').textContent = Array.from(data.brand)[0];
+  $('#account').textContent = account || '代理商管理员';
+  $('#accountMark').textContent = account ? Array.from(account)[0] : '管';
+  const switcher = portalRole==='销售' && data.allSellers.length > 1
+    ? `<label style="display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted)">当前销售：<select id="switchSalesAccount" style="min-height:32px;padding:3px 26px 3px 9px;font-size:12.5px">${options(data.allSellers.map(p=>p.name), portalAccount)}</select></label>`
+    : '';
+  $('#toolbar').innerHTML = portalRole ? switcher + tag(data.people[0]?.status || '在职') :
+    (hqPreview ? badge('总部代登预览','blue') : '')+preview();
+  if (account && (!portalRole || portalView==='overview')) $('#crumb').textContent += ' / ' + account;
+  if (portalRole==='销售' && portalView!=='overview') $('#main').innerHTML = salesFeaturePage(portalView);
+  else if (portalRole==='优化师' && portalView==='detection') $('#main').innerHTML = detectionPage();
+  else $('#main').innerHTML = account ? staffAccount(page,account) : pages[page]();
+  if (page==='customers') filterCustomers();
+  if (page==='operations') filterOperations();
+}
+function orderDetails(o) {
+  const {page,account} = currentView();
+  const svc = orderVersion(o.package)==='服务版';
+  const pwdSt = getCustPwdState(o);
+  const action = account && page==='sales' ? '' : btn('edit-order',o.owner?'编辑交付':'分配优化师',o.id,true);
+  const pwdBtn = pwdSt.applied
+    ? orderTool('order-reset','重置密码',o.id,'重置后原密码失效，新密码仅展示一次')
+    : orderTool('order-apply-pwd','申请密码',o.id,'申请客户初始密码，仅展示一次');
+  modal(o.customer+' · '+o.id,details([
+    ['订单版本', orderVersion(o.package)],
+    ['生效平台', (Array.isArray(o.platforms) && o.platforms.length ? o.platforms : ['Deepseek','豆包','元宝']).join('、')],
+    ['服务周期', o.start+' 至 '+o.end],
+    ['订单金额', money(o.amount)],
+    ['跟单销售', o.sales],
+    ['优化师', svc ? (o.owner || '待分配') : '客户自助'],
+    ['订单状态', o.service],
+    ['榜单状态', o.rank],
+    ['累计发布', o.published+' 篇'],
+    ['续费状态', o.renewal],
+    ['客户登录账号', pwdSt.account],
+    ['登录密码状态', pwdSt.applied ? `已申请发放（系统不存明文${pwdSt.resetCount ? ' · 已重置 ' + pwdSt.resetCount + ' 次' : ''}，遗忘请重置）` : '未申请（请点击下方「申请密码」，仅展示一次）'],
+    ['订单备注', o.note||'—']
+  ])+ `<div class="actions">${action}${pwdBtn}${preview(o)}</div>`);
+}
+function field(label,name,value='',type='text',attrs='required') {
+  return `<label>${label}<input name="${name}" type="${type}" value="${esc(value)}" ${attrs}></label>`;
+}
+const select = (label,name,values,value='') => `<label>${label}<select name="${name}">${options(values,value)}</select></label>`;
+function form(id,body,record='') {
+  return `<form id="${id}" data-id="${esc(record)}"><div class="form-grid">${body}</div><button class="primary">保存</button></form>`;
+}
+function newOrder(customer='') {
+  if (!people('销售').some(p=>p.status==='在职')) {
+    toast('请先在销售管理里新增在职销售');
+    location.hash='sales';
+    return;
+  }
+  const existing = data.orders.find(o=>o.customer===customer);
+  const companyNames = [...new Set(data.orders.map(o=>o.customer))];
+  const customerInput = field('客户企业','customer',existing?.customer||'','text',
+    existing?'required readonly':'required maxlength="40" list="customer-options"')+
+    `<datalist id="customer-options">${options(companyNames)}</datalist>`;
+  modal(existing ? '新建订单 · '+existing.customer : '新建订单',form('addOrder',customerInput+
+    field('行业','industry',existing?.industry||'','text',existing?'required readonly':'required maxlength="24"')+
+    select('订单版本','package',orderVersions)+field('订单金额（元）','amount','','number','required min="0" step="1"')+
+    select('归属销售','sales',people('销售').filter(p=>p.status==='在职').map(p=>p.name),existing?.sales)+
+    field('服务开始','start',demoDay,'date')+field('服务结束','end','2027-02-14','date')+
+    '<label class="wide">订单备注<textarea name="note" maxlength="300"></textarea></label>'));
+}
+function editOrder(o) {
+  const owners = people('优化师').filter(p=>p.status==='在职'||p.name===o.owner).map(p=>p.name);
+  const {page,account} = currentView();
+  const staffView = page==='optimizers' && account;
+  const assignment = staffView ? `<input type="hidden" name="owner" value="${esc(o.owner)}">` :
+    select('优化师','owner',['未分配',...owners],o.owner||'未分配');
+  modal('编辑交付 · '+o.customer,form('editOrder',assignment+
+    select('服务状态','service',staffView ? statuses.slice(1) : statuses,o.service)+`<label>榜单状态（由后台爬虫自动同步）<input value="${esc(o.rank)}" readonly disabled></label>`+
+    field('累计发布（篇）','published',o.published,'number','required min="0" step="1"'),o.id));
+}
+function editPerson(role,p) {
+  modal((p?'编辑':'新增')+role,form('editPerson',field('姓名','name',p?.name||'','text',p?'required readonly':'required maxlength="20"')+
+    field(role==='销售'?'团队':'擅长领域','team',p?.team||'','text','required maxlength="30"')+
+    select('状态','status',['在职','停用'],p?.status||'在职')+`<input type="hidden" name="role" value="${role}">`,p?.name));
+}
+const actions = {
+  'add-order':newOrder, order:(_,o)=>orderDetails(o), 'edit-order':(_,o)=>editOrder(o),
+  'clear-customers':()=>{ Object.assign(customerFilters,customerFilterDefaults); render(); },
+  'add-sales':()=>editPerson('销售'), 'add-optimizer':()=>editPerson('优化师'),
+  'edit-person':name=>{const p=data.people.find(p=>p.name===name); editPerson(p.role,p);}
+};
+document.addEventListener('click',event=>{
+  const button = event.target.closest('[data-action]');
+  if (!button) return;
+  const {action,id} = button.dataset;
+  actions[action]?.(id,data.orders.find(o=>o.id===id));
+});
+document.addEventListener('input',event=>{
+  if (event.target.id==='customerSearch') {
+    customerFilters.search=event.target.value;
+    filterCustomers();
+  }
+  if (event.target.matches('#addOrder [name="customer"]')) {
+    const existing = data.orders.find(o=>o.customer===event.target.value.trim());
+    if (existing) $('#addOrder [name="industry"]').value=existing.industry;
+  }
+});
+document.addEventListener('change',event=>{
+  if (event.target.matches('#service,#seller,#version')) {
+    customerFilters[event.target.id]=event.target.value;
+    filterCustomers();
+  }
+  if (event.target.id==='opRank') filterOperations();
+});
+const updates = {
+  addOrder(values) {
+    values.customer=values.customer.trim();
+    const existing = data.orders.find(o=>o.customer===values.customer);
+    values.industry=existing?.industry||values.industry.trim();
+    if (!values.customer || !values.industry || !values.sales || !orderVersions.includes(values.package) || values.end<values.start) return '请检查客户、行业、销售、版本和服务周期';
+    const id='GEO-'+String(Math.max(261107,...data.orders.map(o=>Number(o.id.slice(4))))+1);
+    data.orders.unshift({...values,id,amount:Number(values.amount),owner:'',service:'待派单',rank:ranks[0],published:0,renewal:'待联系'});
+  },
+  editOrder(values,id) {
+    values.owner=values.owner==='未分配'?'':values.owner;
+    delete values.rank;
+    if (!values.owner && values.service!=='待派单') return '请先分配优化师';
+    if (values.owner && values.service==='待派单') values.service='待启动';
+    Object.assign(data.orders.find(o=>o.id===id),values,{published:Number(values.published)});
+  },
+  editPerson(values,id) {
+    values.name=values.name.trim();
+    values.team=values.team.trim();
+    if (!values.name || !values.team) return '请填写姓名和团队或领域';
+    if (!id && data.people.some(p=>p.name===values.name)) return '成员姓名已存在';
+    if (id) Object.assign(data.people.find(p=>p.name===id),values);
+    else data.people.push(values);
+  },
+  brandForm(values) {
+    if (!values.brand.trim()) return '请填写品牌名称';
+    data.brand=values.brand.trim();
+    data.color=values.color;
+  }
+};
+document.addEventListener('submit',event=>{
+  const form = event.target;
+  if (!Object.hasOwn(updates,form.id)) return;
+  event.preventDefault();
+  const error = updates[form.id](Object.fromEntries(new FormData(form)),form.dataset.id);
+  if (error) { toast(error); return; }
+  let stored;
+  if (portalRole) {
+    const changes = load(portalCacheKey,{});
+    const id = form.dataset.id;
+    changes[id] = {...changes[id],...Object.fromEntries(new FormData(form))};
+    delete changes[id].owner;
+    if (form.id==='editOrder') changes[id].published=Number(changes[id].published);
+    stored = save(portalCacheKey,changes);
+  } else stored = save(storageKey,data);
+  if ($('#dialog').open) $('#dialog').close();
+  if (form.id==='addOrder') {
+    Object.assign(customerFilters,customerFilterDefaults);
+    expandedCustomers.add(data.orders[0].customer);
+  }
+  if (form.id==='addOrder' && location.hash!=='#customers') location.hash='customers';
+  else render();
+  toast(stored?'已保存在当前浏览器':'已更新本次预览');
+});
+if (portalRole) $('.brand').removeAttribute('href');
+document.addEventListener('click',event=>{
+  const item = event.target.closest('[data-work-view]');
+  if (!item) return;
+  portalView = item.dataset.workView;
+  render();
+  $('#nav [aria-current="page"]').focus({preventScroll:true});
+  if (portalView==='projects') $('#workspace-orders')?.scrollIntoView({block:'start'});
+  else window.scrollTo(0,0);
+});
+
+// ============================================================================
+// 代理商预存余额与两段式扣费逻辑（CRM 统一充值入账 + 建单基础费 + 额外服务实扣）
+//   - 代理商预存资金由商务通过 CRM 下单充值入账（不支持扫码充值）
+//   - 生文/售前工具/爬虫/信源按实际消耗直接扣代理商余额
+//   - 余额不足直接提示「余额不足，请联系商务通过 CRM 充值入账」
+// ============================================================================
+const ACC_KEYS = {
+  balances: 'geo-oem-simple-bal-v3',
+  records:  'geo-oem-simple-rec-v7',
+  mediaCfg: 'geo-oem-simple-media-v2',
+  sellerLim:'geo-oem-simple-seller-v3',
+  verDefs:  'geo-oem-simple-verdefs-v4'
+};
+
+const DEFAULT_VER_DEFS = {
+  'OEM-001': {
+    service: { articles: 80,  crawlLimit: 300, sourceLimit: 5000 },
+    tool:    { articles: 120, crawlLimit: 200, sourceLimit: 3000 },
+    salesDefaults: { keywords: 50, baseline: 20, diagnosis: 15 }
+  },
+  'OEM-002': {
+    service: { articles: 80,  crawlLimit: 300, sourceLimit: 5000 },
+    tool:    { articles: 100, crawlLimit: 200, sourceLimit: 2500 },
+    salesDefaults: { keywords: 30, baseline: 10, diagnosis: 10 }
+  }
+};
+
+const DEFAULT_BALANCES = {
+  'OEM-001': 18640.00,
+  'OEM-002': 3850.00,
+  'OEM-003': 0.00
+};
+
+const DEFAULT_RECORDS = [
+  { id:'LS-1009', time:'2026-11-19 14:05', partner:'OEM-001', type:'选词工具', desc:'销售「陈乔」使用选词工具 × 1 次（¥5.00/次）', amount:-5.00, after:18640.00 },
+  { id:'LS-1008', time:'2026-11-19 13:18', partner:'OEM-001', type:'售前基线测算', desc:'销售「陈乔」发起售前基线测算 × 1 次（¥15.00/次）', amount:-15.00, after:18645.00 },
+  { id:'LS-1007', time:'2026-11-19 11:20', partner:'OEM-001', type:'信源发稿', desc:'长三角城市网 × 2 篇（信源发稿扣费）', amount:-76.00, after:18660.00 },
+  { id:'LS-1006', time:'2026-11-19 10:42', partner:'OEM-001', type:'售前报告', desc:'销售「陈乔」生成售前诊断报告 × 1 份（¥25.00/份）', amount:-25.00, after:18736.00 },
+  { id:'LS-1005', time:'2026-11-19 09:15', partner:'OEM-001', type:'爬虫消耗', desc:'各订单日常排名与收录监测 × 22 次（¥2.00/次）', amount:-44.00, after:18761.00 },
+  { id:'LS-1004', time:'2026-11-16 15:20', partner:'OEM-001', type:'新建订单', desc:'新建服务版订单「星海精密」3个月（开单基础费）', amount:-4500.00, after:18803.60 },
+  { id:'LS-1003', time:'2026-11-15 16:30', partner:'OEM-002', type:'信源发稿', desc:'环球科技新闻网 × 3 篇（信源发稿扣费）', amount:-384.00, after:3850.00 },
+  { id:'LS-1002', time:'2026-11-14 11:10', partner:'OEM-001', type:'新建订单', desc:'新建工具版订单「知禾软件」3个月（开单基础费）', amount:-1500.00, after:23303.60 },
+  { id:'LS-1001', time:'2026-11-01 09:00', partner:'OEM-001', type:'CRM 充值入账', desc:'CRM 签约订单充值入账（单号 CRM-202611-001）', amount:25000.00, after:25000.00 }
+];
+
+const DEFAULT_MEDIA_CFG = {
+  'OEM-001': { markup: 1.0, hideServicePrice: true },
+  'OEM-002': { markup: 1.3, hideServicePrice: true },
+  'OEM-003': { markup: 1.0, hideServicePrice: true }
+};
+
+const DEFAULT_SELLER_LIM = {
+  'OEM-001': {
+    '陈乔': { keywords:{used:18,limit:50}, baseline:{used:7,limit:20}, diagnosis:{used:12,limit:20} },
+    '林佳': { keywords:{used:11,limit:40}, baseline:{used:4,limit:15}, diagnosis:{used:6, limit:15} }
+  },
+  'OEM-002': {
+    '姚琪': { keywords:{used:9,limit:30}, baseline:{used:3,limit:10}, diagnosis:{used:5,limit:10} }
+  },
+  'OEM-003': {
+    '江禾': { keywords:{used:4,limit:20}, baseline:{used:2,limit:10}, diagnosis:{used:3,limit:10} }
+  }
+};
+
+function accLoad(key, def) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : structuredClone(def);
+  } catch { return structuredClone(def); }
+}
+function accSave(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
+}
+function accNow() {
+  const d = new Date(), p = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function accGetHqRates(tid='OEM-001') {
+  try {
+    const list = JSON.parse(localStorage.getItem('geo-oem-hq-v9') || 'null');
+    const p = Array.isArray(list) ? list.find(x => x.id === tid) : null;
+    if (p && p.prices) {
+      return {
+        articles:    (p.prices.articles ?? 350) / 100,
+        keywordTool: (p.prices.keywordTool ?? 500) / 100,
+        baseline:    (p.prices.baseline ?? 1500) / 100,
+        presales:    (p.prices.presales ?? 2500) / 100
+      };
+    }
+  } catch {}
+  return { articles: 3.5, keywordTool: 5.0, baseline: 15.0, presales: 25.0 };
+}
+function accGetBalance(tid='OEM-001') {
+  const map = accLoad(ACC_KEYS.balances, DEFAULT_BALANCES);
+  return Number(map[tid] ?? 0);
+}
+function accRecharge(tid, amount, note) {
+  const map = accLoad(ACC_KEYS.balances, DEFAULT_BALANCES);
+  const next = Number(((map[tid] ?? 0) + Number(amount)).toFixed(2));
+  map[tid] = next;
+  accSave(ACC_KEYS.balances, map);
+  const recs = accLoad(ACC_KEYS.records, DEFAULT_RECORDS);
+  recs.unshift({
+    id: 'LS-' + (1009 + recs.length),
+    time: accNow(), partner: tid, type: 'CRM 充值入账',
+    desc: note || 'CRM 签约订单充值入账',
+    amount: Number(Number(amount).toFixed(2)),
+    after: next
+  });
+  accSave(ACC_KEYS.records, recs);
+  return next;
+}
+function accDeduct(tid, type, desc, cost) {
+  const bal = accGetBalance(tid);
+  if (bal < cost) {
+    return { ok: false, balance: bal, msg: `账户余额不足（当前余额 ¥${bal.toFixed(2)}，本次需扣 ¥${Number(cost).toFixed(2)}），请联系商务通过 CRM 充值入账。` };
+  }
+  const map = accLoad(ACC_KEYS.balances, DEFAULT_BALANCES);
+  const next = Number((bal - Number(cost)).toFixed(2));
+  map[tid] = next;
+  accSave(ACC_KEYS.balances, map);
+  const recs = accLoad(ACC_KEYS.records, DEFAULT_RECORDS);
+  recs.unshift({
+    id: 'LS-' + (1009 + recs.length),
+    time: accNow(), partner: tid, type, desc,
+    amount: -Number(Number(cost).toFixed(2)),
+    after: next
+  });
+  accSave(ACC_KEYS.records, recs);
+  return { ok: true, balance: next };
+}
+function accGetVerDefaults(tid='OEM-001') {
+  const map = accLoad(ACC_KEYS.verDefs, DEFAULT_VER_DEFS);
+  const cur = map[tid] || DEFAULT_VER_DEFS['OEM-001'];
+  if (!cur.salesDefaults) cur.salesDefaults = { keywords: 50, baseline: 20, diagnosis: 15 };
+  return cur;
+}
+function accGetSellerLim(tid='OEM-001') {
+  const map = accLoad(ACC_KEYS.sellerLim, DEFAULT_SELLER_LIM);
+  return map[tid] || DEFAULT_SELLER_LIM['OEM-001'];
+}
+function accGetSellerQuota(tid, name) {
+  const sd = accGetVerDefaults(tid).salesDefaults;
+  const raw = accGetSellerLim(tid)[name];
+  if (raw && raw.keywords && raw.baseline && raw.diagnosis) return raw;
+  return {
+    keywords:  { used: 0, limit: sd.keywords },
+    baseline:  { used: 0, limit: sd.baseline },
+    diagnosis: { used: raw?.used || 0, limit: raw?.limit || sd.diagnosis }
+  };
+}
+function accSaveSellerLim(tid, name, obj) {
+  const map = accLoad(ACC_KEYS.sellerLim, DEFAULT_SELLER_LIM);
+  if (!map[tid]) map[tid] = {};
+  map[tid][name] = obj;
+  accSave(ACC_KEYS.sellerLim, map);
+}
+
+function salesSimpleBar(kind='diagnosis') {
+  const bal = accGetBalance(tenantId);
+  const q = accGetSellerQuota(tenantId, portalAccount);
+  const rates = accGetHqRates(tenantId);
+  const meta = {
+    keywords:  { name:'选词工具',     unit:'次', cost:rates.keywordTool, item:q.keywords },
+    baseline:  { name:'售前基线测算', unit:'次', cost:rates.baseline,    item:q.baseline },
+    diagnosis: { name:'售前报告',     unit:'份', cost:rates.presales,    item:q.diagnosis }
+  }[kind] || { name:'售前报告', unit:'份', cost:rates.presales, item:q.diagnosis };
+  const remain = Math.max(0, meta.item.limit - meta.item.used);
+  const pct = meta.item.limit > 0 ? Math.min(100, Math.round((meta.item.used / meta.item.limit) * 100)) : 100;
+  const warn = bal < meta.cost || remain <= 0;
+  return `<div class="sales-quota-strip ${warn ? 'warn' : ''}">
+    <div class="sales-quota-left">
+      <span class="sales-quota-pill">本月${meta.name}</span>
+      <span><b>${meta.item.used}</b> / ${meta.item.limit} ${meta.unit}</span>
+      <span class="sales-quota-bar" aria-hidden="true"><i style="width:${pct}%"></i></span>
+      <small class="muted">单价 ¥${meta.cost.toFixed(2)}/${meta.unit}</small>
+    </div>
+    <div class="sales-quota-bal" style="${warn ? 'background:#fff1f2;border-color:#fecdd3;color:#9f1239' : ''}">
+      ${bal < meta.cost ? '余额不足，请通过 CRM 充值' : (remain <= 0 ? '本月额度已用完' : `账户余额 <b>¥${bal.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}</b>`)}
+    </div>
+  </div>`;
+}
+document.addEventListener('change', e => {
+  if (e.target.id === 'switchSalesAccount') {
+    portalAccount = e.target.value;
+    salesOrderQuery = {};
+    syncLivePartnerOrders();
+    openSalesCustomers.clear();
+    if (data.orders[0]) openSalesCustomers.add(data.orders[0].customer);
+    render();
+    toast(`已切换至销售「${portalAccount}」的跟单与售前视图`);
+  }
+});
+window.addEventListener('storage', () => render());
+
+addEventListener('hashchange',render);
+const salesNavigation = [
+  ['辅助工具',[['keywords','✧','选词工具'],['baseline','◴','售前基线测算']]],
+  ['分析报告',[['diagnosis','▤','售前报告']]],
+  ['协同',[['orders','◉','销售跟进订单']]]
+];
+const salesTitles = Object.fromEntries(salesNavigation.flatMap(([,items])=>items.map(([id,,label])=>[id,label])));
+function salesFeaturePage(view) {
+  if (view==='keywords') return salesSimpleBar('keywords') + keywordPage();
+  if (view==='baseline'||view==='diagnosis') return salesSimpleBar(view) + taskPage(view);
+  if (view==='orders') return followOrdersPage();
+  return staffAccount('sales',portalAccount);
+}
+document.addEventListener('click',event=>{
+  const button=event.target.closest('[data-sales-click]');
+  if (!button) return;
+  const action=button.dataset.salesClick;
+  if (action==='close') { $('#dialog').close();return; }
+  if (action==='new-baseline') { beginBaseline();return; }
+  if (action==='new-diagnosis') { showDiagnosisForm();return; }
+  if (action==='show-baseline'||action==='show-diagnosis') {
+    showSavedTask(action,Number(button.dataset.index));return;
+  }
+  if (button.closest('#sales-wizard')) { wizardClick(button);return; }
+  if (action.startsWith('order-')||action==='reset-filters') { salesOrderClick(button);return; }
+  keywordClick(button);
+});
+document.addEventListener('change',event=>{
+  const input=event.target;
+  if (input.name==='industry' && input.form?.elements.subIndustry) {
+    if (input.form.id==='sales-keywords') keywordDraft.subIndustry='';
+    updateIndustry(input.form);
+  }
+});
+document.addEventListener('input',event=>{
+  if (event.target.form?.id==='sales-keywords') keywordDraft[event.target.name]=event.target.value;
+});
+document.addEventListener('submit',event=>{
+  const form=event.target;
+  if (!form.id.startsWith('sales-')) return;
+  event.preventDefault();
+  if (form.id==='sales-keywords') createEstimate(form);
+  if (form.id==='sales-wizard') submitWizard();
+  if (form.id==='sales-diagnosis') submitDiagnosis(form);
+  if (form.id.startsWith('sales-order-')) handleOrderForm(form);
+});
+const keywordStore = 'geo-oem-estimates-'+portalAccount+tenantSuffix;
+const estimates = load(keywordStore,[]);
+const industryTree = {
+  '工业制造':['工业设备','仪器仪表','材料与零部件'],
+  '企业服务':['企业软件','咨询服务','营销服务'],
+  '消费品':['数码家电','食品饮料','个护美妆'],
+  '家居建材':['装修服务','门窗与建材','家具'],
+  '生活服务':['餐饮服务','医疗健康','教育培训'],
+  '其他':['综合服务']
+};
+const must = '<span class="sales-required" aria-hidden="true">*</span>';
+const splitValues = (value='') => [...new Set(value.split(/[\n,，、；;]+/).map(v=>v.trim()).filter(Boolean))];
+function salesField(label,name,{placeholder='',hint='',value='',multi=false,required=true}={}) {
+  const id='sales-'+name;
+  const attr = `id="${id}" name="${name}" placeholder="${esc(placeholder)}" ${required?'required':''}`;
+  return `<div class="sales-field"><label for="${id}">${label} ${required?must:''}</label>
+    ${multi?`<textarea ${attr} maxlength="1000">${esc(value)}</textarea>`:`<input ${attr} value="${esc(value)}" maxlength="100">`}
+    ${hint?`<small>${esc(hint)}</small>`:''}</div>`;
+}
+function industryFields(primary='',secondary='') {
+  return `<div class="sales-industry-selects">
+    <select name="industry" aria-label="一级行业" required>${optionList(Object.keys(industryTree),primary,'请选择一级行业')}</select>
+    <select name="subIndustry" aria-label="二级行业" required ${primary?'':'disabled'}>
+      ${optionList(industryTree[primary]||[],secondary,primary?'请选择二级行业':'请先选择一级行业')}</select></div>`;
+}
+function optionList(values,current,placeholder) {
+  return `<option value="">${esc(placeholder)}</option>`+options(values,current);
+}
+const keywordMode = '品牌曝光';
+const keywordDraft = {};
+let estimate = null;
+function keywordPage() {
+  return heading(esc(data.brand)+'选词工具','',
+    '<div class="actions"><button class="sales-violet" data-sales-click="favorites">估价收藏夹</button></div>')+
+    `<section class="panel sales-form"><div class="sales-form-head"><span class="sales-icon soft" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 2.4 5.6L20 10l-5.6 2.4L12 18l-2.4-5.6L4 10l5.6-2.4Z"/><path d="M19 16l1 2 2 1-2 1-1 2-1-2-2-1 2-1Z"/></svg></span><div>
+      <h2>客户信息</h2></div></div>
+      <form id="sales-keywords" class="sales-fields">
+        ${salesField('公司名称','company',{placeholder:'请输入公司全称',value:keywordDraft.company})}
+        ${salesField('产品 / 业务名称','product',{placeholder:'例如：工业视觉检测系统',value:keywordDraft.product})}
+        ${salesField('核心关键词','keyword',{placeholder:'例如：机器视觉检测',value:keywordDraft.keyword})}
+        <div class="sales-industry"><div class="section-head"><span class="sales-label">行业 ${must}</span><button type="button" data-sales-click="identify"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 2.4 5.6L20 10l-5.6 2.4L12 18l-2.4-5.6L4 10l5.6-2.4Z"/><path d="M19 16l1 2 2 1-2 1-1 2-1-2-2-1 2-1Z"/></svg> 智能识别</button></div>
+          ${industryFields(keywordDraft.industry,keywordDraft.subIndustry)}</div>
+        <div class="sales-form-actions"><button class="sales-violet">生成推荐词与报价</button></div>
+      </form>
+    </section><div id="keyword-result" aria-live="polite">${estimate?estimateMarkup(estimate):''}</div>`;
+}
+function estimateMarkup(item,allowSave=true) {
+  return `<section class="panel pad">${section('推荐词与预估报价',
+    allowSave?'<button data-sales-click="save-estimate">收藏估价</button>':'')}
+    <p class="muted">${esc(item.company)} · ${esc(item.industry)}</p>
+    ${table(['词条类型','建议搜索词','AI 热度','竞争度','优化难度','预估报价'],item.rows.map(row=>row.map(esc)))}
+    <p class="sales-note">预估合计 ${money(item.total)}</p></section>`;
+}
+function showEstimate() {
+  if (estimate && $('#keyword-result')) $('#keyword-result').innerHTML=estimateMarkup(estimate);
+}
+function keywordClick(button) {
+  const v = button.dataset.salesClick;
+  if (v==='benefits') modal('选词工具权益',details([
+    ['品牌曝光','适用于品牌推荐、选型和比较类搜索词。']
+  ]));
+  if (v==='favorites') modal('估价收藏夹',table(['客户','行业','预估报价','操作'],estimates.map((e,i)=>[
+    esc(e.company),esc(e.industry||'—'),money(e.total),`<button class="link-button" data-sales-click="view-estimate" data-index="${i}">查看</button>`
+  ])));
+  if (v==='view-estimate') {
+    const saved = estimates[Number(button.dataset.index)];
+    if (saved) modal('收藏的估价',estimateMarkup(saved,false));
+  }
+  if (v==='save-estimate' && estimate) {
+    if (!estimates.some(e=>JSON.stringify(e)===JSON.stringify(estimate))) estimates.unshift(estimate);
+    save(keywordStore,estimates);
+    toast('已加入估价收藏夹');
+  }
+  if (v==='identify') {
+    const form = $('#sales-keywords');
+    const v = Object.fromEntries(new FormData(form));
+    const text = [v.company,v.product,v.keyword].join(' ').trim();
+    if (!text) { toast('请先填写公司、产品或关键词'); return; }
+    const match = [
+      [/检测|仪器|传感/,'工业制造','仪器仪表'],
+      [/设备|机械|制造/,'工业制造','工业设备'],
+      [/门窗|建材|装修/,'家居建材','门窗与建材'],
+      [/软件|系统|SaaS|平台/i,'企业服务','企业软件'],
+      [/手机|数码|电器/,'消费品','数码家电'],
+      [/饮料|食品/,'消费品','食品饮料']
+    ].find(([pattern])=>pattern.test(text));
+    if (!match) { toast('暂未识别，请手动选择行业'); return; }
+    form.elements.industry.value=match[1];
+    updateIndustry(form);
+    form.elements.subIndustry.value=match[2];
+    toast('已填入行业建议，可手动修改');
+  }
+}
+function updateIndustry(form) {
+  const parent = form.elements.industry.value;
+  const sub = form.elements.subIndustry;
+  sub.innerHTML=optionList(industryTree[parent]||[],'',parent?'请选择二级行业':'请先选择一级行业');
+  sub.disabled=!parent;
+}
+function createEstimate(form) {
+  const v = Object.fromEntries(new FormData(form));
+  if (['company','product','keyword'].some(key=>!v[key].trim()) || !v.subIndustry) {
+    toast('请填写完整的客户与行业信息'); return;
+  }
+  if (['product','keyword'].some(key=>splitValues(v[key]).length!==1)) { toast('产品名称和业务关键词各填写一项'); return; }
+  const q = accGetSellerQuota(tenantId, portalAccount);
+  if (q.keywords.used >= q.keywords.limit) {
+    toast('您本月选词工具次数已用完，请联系管理员在销售管理中调高上限'); return;
+  }
+  const price = accGetHqRates(tenantId).keywordTool;
+  const res = accDeduct(tenantId, '选词工具', `销售「${portalAccount}」为「${v.company.trim()}」使用选词工具 × 1 次（¥${price.toFixed(2)}/次）`, price);
+  if (!res.ok) { toast(res.msg); return; }
+  q.keywords.used += 1;
+  accSaveSellerLim(tenantId, portalAccount, q);
+  Object.assign(keywordDraft,v);
+  const keyword = v.keyword.trim(), product = v.product.trim();
+  const variants = [
+    ['品牌词',`${v.company.trim()}的${product}怎么样？`,'中','低','低',240],
+    ['品类词',`${keyword}有哪些品牌？`,'高','高','中',420],
+    ['选型词',`${keyword}怎么选？`,'高','中','中',360],
+    ['比较词',`${keyword}主流方案有什么区别？`,'中','中','中',300]
+  ];
+  estimate={company:v.company.trim(),industry:v.industry+' / '+v.subIndustry,mode:keywordMode,
+    rows:variants.map(row=>[...row.slice(0,5),money(row[5])]),total:variants.reduce((sum,row)=>sum+row[5],0)};
+  render();
+  $('#keyword-result')?.scrollIntoView({block:'nearest'});
+  toast(`推荐词与报价已生成，从余额扣除 ¥${price.toFixed(2)}（剩余余额 ¥${res.balance.toFixed(2)}）`);
+}
+const aiPlatforms = ['豆包','DeepSeek','通义千问','Kimi','元宝','文心一言','智谱'];
+const metricNames = ['品牌提及率','平均提及位置','竞品提及率','信源分布'];
+const reportSections = ['整体表现','场景分析','竞品对比','品牌舆情','信源诊断','优化机会','案例参考'];
+const baselineKey = 'geo-oem-baselines-'+portalAccount+tenantSuffix;
+const reportKey = 'geo-oem-presales-reports-'+portalAccount+tenantSuffix;
+const defaultBaselines = [
+  {name:'远山智能',aliases:'远山智能，远山视觉，YS-Vision',competitors:['基恩士','康耐视','海康机器人'],words:[{type:'品类词',text:'工业视觉检测系统哪家好'},{type:'选型词',text:'3C外观缺陷检测设备推荐'},{type:'品牌词',text:'远山智能视觉检测怎么样'},{type:'比较词',text:'国产机器视觉品牌对比'}],platforms:['豆包','DeepSeek','通义千问','Kimi'],scope:'国内',samples:'3',metrics:['品牌提及率','平均提及位置','竞品提及率','信源分布']},
+  {name:'木石家居',aliases:'木石家居，木石全屋定制',competitors:['欧派','索菲亚','尚品宅配'],words:[{type:'品类词',text:'环保全屋定制品牌推荐'},{type:'购买词',text:'佛山全屋定制哪家性价比高'},{type:'场景词',text:'小户型极简衣柜定制方案'}],platforms:['豆包','DeepSeek','元宝'],scope:'国内',samples:'3',metrics:['品牌提及率','平均提及位置']}
+];
+const defaultReports = [
+  {name:'远山智能科技有限公司',brand:'远山智能',products:['工业视觉检测系统','AI 外观质检工作站'],competitors:['基恩士','康耐视','海康机器人'],platforms:['豆包','DeepSeek','通义千问','Kimi'],mode:'深度分析',industry:'工业制造 / 仪器仪表',modules:['整体表现','场景分析','竞品对比','品牌舆情','信源诊断','优化机会','诊断证据']},
+  {name:'知禾软件技术有限公司',brand:'知禾协同',products:['研发项目管理云','敏捷需求看板'],competitors:['PingCode','ONES','飞书项目'],platforms:['DeepSeek','豆包','Kimi'],mode:'快速分析',industry:'企业服务 / 企业软件',modules:['整体表现','竞品对比','信源诊断','优化机会','诊断证据']}
+];
+const baselineTasks = load(baselineKey, null) ?? defaultBaselines;
+const reportTasks = load(reportKey, null) ?? defaultReports;
+function choices(title,name,values,selected=[],type='checkbox',fixed='') {
+  return `<fieldset class="sales-choices"><legend>${title}</legend>${values.map(v=>`<label>
+    <input name="${name}" type="${type}" value="${esc(v)}" ${selected.includes(v)||v===fixed?'checked':''} ${v===fixed?'disabled':''}>${esc(v)}</label>`).join('')}</fieldset>`;
+}
+function wideModal(title,body) {
+  $('#dialog').classList.add('sales-dialog');
+  modal(title,`<div class="sales-dialog-inner">${body}</div>`);
+}
+$('#dialog').addEventListener('close',event=>{
+  if (!event.currentTarget.open) event.currentTarget.classList.remove('sales-dialog');
+});
+function taskPage(kind) {
+  const isBaseline=kind==='baseline';
+  const tasks=isBaseline?baselineTasks:reportTasks;
+  const add=isBaseline?'新建售前基线测算':'新建售前报告';
+  return heading(salesTitles[kind],'',
+    `<button class="primary" data-sales-click="new-${kind}">＋ ${add}</button>`)+
+    `<section class="panel"><div class="pad"><h2>${isBaseline?'基线测算任务':'售前报告任务'}</h2></div>
+      ${table(['客户','监测平台','状态','操作'],tasks.map((task,i)=>[esc(task.name),esc(task.platforms.join('、')),
+        badge('诊断已就绪','green'),`<button class="link-button" data-sales-click="show-${kind}" data-index="${i}">查看诊断报告 →</button>`]))}
+      ${foot(tasks.length)}</section>`;
+}
+let wizardStep=1;
+let baseline;
+function beginBaseline() {
+  wizardStep=1;
+  baseline={name:'',aliases:'',competitors:[],words:[],platforms:[],scope:'国内',samples:'3',metrics:['品牌提及率','平均提及位置']};
+  showWizard();
+}
+function chips(key,values) {
+  return values.map((item,i)=>`<span class="sales-chip">${esc(item)}
+    <button type="button" data-sales-click="remove-${key}" data-index="${i}" aria-label="移除 ${esc(item)}">×</button></span>`).join('');
+}
+function firstStep() {
+  return `<div class="sales-wizard-title"><h3>先填写客户和要测的词</h3><p class="muted">客户名称、品牌提及词和核心词必填，指定竞品可选填。</p></div>
+    ${salesField('客户名称','customer',{placeholder:'请输入客户名称',value:baseline.name})}
+    ${salesField('品牌提及词','aliases',{placeholder:'例如：客户公司全称，客户简称，产品名称',value:baseline.aliases,
+      multi:true,hint:'多个词可用逗号或换行分隔。'})}
+    <div class="sales-field"><span class="sales-label">指定竞品品牌 <small>选填 · 最多 3 个</small></span>
+      <div id="base-rivals" class="sales-fields">${baseline.competitors.map((name,i)=>`<div class="actions"><input name="competitor" value="${esc(name)}" maxlength="50" aria-label="竞品 ${i+1}">
+      <button type="button" data-sales-click="remove-rival" data-index="${i}" aria-label="移除竞品 ${i+1}">×</button></div>`).join('')}</div>
+      <div class="actions"><button type="button" data-sales-click="add-rival" ${baseline.competitors.length>=3?'disabled':''}>＋ 添加竞品</button></div></div>
+    <div class="sales-field"><label for="base-words">核心词 ${must} <small>已添加 ${baseline.words.length}/20 个核心词</small></label>
+      <div class="sales-key-entry"><textarea id="base-words" name="wordsPending" placeholder="请输入核心词，可用逗号或换行分隔" maxlength="1000"></textarea>
+        <select name="wordType" aria-label="核心词类型">${options(['品类词','品牌词','购买词','场景词'])}</select>
+        <button type="button" class="primary" data-sales-click="add-words">＋ 添加核心词</button></div>
+      <div class="sales-chip-row">${chips('word',baseline.words.map(w=>w.type+' · '+w.text))}</div></div>`;
+}
+function scopeStep() {
+  return `<div class="sales-wizard-title"><h3>选择监测范围</h3><p class="muted">选择需要抽检的 AI 平台和每词抽检次数。</p></div>
+    ${choices('监测平台 '+must,'platform',aiPlatforms,baseline.platforms)}
+    <div class="sales-two"><div class="sales-field"><label for="base-scope">市场范围</label><select id="base-scope" name="scope">${options(['国内','海外'],baseline.scope)}</select></div>
+      <div class="sales-field"><label for="base-samples">每词每平台抽检次数 ${must}</label>
+      <input id="base-samples" name="samples" type="number" min="1" max="10" value="${esc(baseline.samples)}" required></div></div>`;
+}
+function metricsStep() {
+  return `<div class="sales-wizard-title"><h3>确认指标与监测配置</h3></div>
+    ${choices('测算指标 '+must,'metric',metricNames,baseline.metrics)}
+    ${details([['客户',baseline.name],['核心词',baseline.words.length+' 个'],['平台',baseline.platforms.join('、')],
+      ['抽检次数',baseline.words.length*baseline.platforms.length*Number(baseline.samples)+' 次（计划）']])}
+    <p class="sales-hint">保存后可查看配置。实际测算需要接入采样服务。</p>`;
+}
+function showWizard() {
+  const names=['客户与词配置','监测范围','指标与确认'];
+  const body = [firstStep,scopeStep,metricsStep][wizardStep-1]();
+  wideModal('新建售前基线测算',`<ol class="sales-steps">${names.map((name,i)=>`<li ${i+1===wizardStep?'aria-current="step"':''}><b>${i+1}</b>${name}</li>`).join('')}</ol>
+    <form id="sales-wizard"><div class="sales-fields">${body}</div><p id="wizard-error" class="sales-error" role="alert"></p>
+      <footer class="sales-wizard-footer"><small>步骤 ${wizardStep} / 3</small><div class="actions">
+        <button type="button" data-sales-click="${wizardStep===1?'close':'wizard-prev'}">${wizardStep===1?'取消':'上一步'}</button>
+        <button class="primary">${wizardStep===3?'保存测算配置':'下一步 ›'}</button></div></footer></form>`);
+}
+function readWizard() {
+  const values=new FormData($('#sales-wizard'));
+  if (wizardStep===1) {
+    baseline.name=String(values.get('customer')).trim();
+    baseline.aliases=String(values.get('aliases')).trim();
+    baseline.competitors=values.getAll('competitor').map(x=>x.trim());
+  }
+  if (wizardStep===2) {
+    baseline.platforms=values.getAll('platform');
+    baseline.scope=values.get('scope');
+    baseline.samples=values.get('samples');
+  }
+  if (wizardStep===3) baseline.metrics=values.getAll('metric');
+  return values;
+}
+function wizardClick(button) {
+  const values=readWizard();
+  const action=button.dataset.salesClick;
+  if (action==='wizard-prev') { wizardStep--;showWizard();return; }
+  if (action==='add-rival' && baseline.competitors.length<3) baseline.competitors.push('');
+  if (action==='remove-rival') baseline.competitors.splice(Number(button.dataset.index),1);
+  if (action==='remove-word') baseline.words.splice(Number(button.dataset.index),1);
+  if (action==='add-words') {
+    const input=splitValues(values.get('wordsPending'));
+    const added=input.filter(text=>!baseline.words.some(w=>w.text===text));
+    if (!input.length || !added.length) { $('#wizard-error').textContent='请输入尚未添加的核心词。';return; }
+    if (baseline.words.length+added.length>20) { $('#wizard-error').textContent='每个任务最多添加 20 个核心词。';return; }
+    const type=values.get('wordType');
+    baseline.words.push(...added.map(text=>({text,type})));
+  }
+  showWizard();
+  if (action!=='add-words' && $('#base-words')) {
+    $('#base-words').value=values.get('wordsPending')||'';
+  }
+  if (values.get('wordType') && $('#sales-wizard [name=wordType]')) {
+    $('#sales-wizard [name=wordType]').value=values.get('wordType');
+  }
+}
+function submitWizard() {
+  const values=readWizard();
+  let error='';
+  if (wizardStep===1 && (!baseline.name || !splitValues(baseline.aliases).length || !baseline.words.length)) {
+    error='请填写客户名称、品牌提及词，并点击「添加核心词」确认词条。';
+  } else if (wizardStep===1 && String(values.get('wordsPending')||'').trim()) {
+    error='还有未添加的核心词，请先添加或清空输入框。';
+  } else if (wizardStep===2 && !baseline.platforms.length) error='请至少选择一个监测平台。';
+  else if (wizardStep===3 && !baseline.metrics.length) error='请至少选择一个测算指标。';
+  if (error) { $('#wizard-error').textContent=error;return; }
+  if (wizardStep<3) { wizardStep++;showWizard();return; }
+  const q = accGetSellerQuota(tenantId, portalAccount);
+  if (q.baseline.used >= q.baseline.limit) {
+    $('#wizard-error').textContent = '您本月售前基线测算次数已用完，请联系管理员在销售管理中调高上限。'; return;
+  }
+  const price = accGetHqRates(tenantId).baseline;
+  const res = accDeduct(tenantId, '售前基线测算', `销售「${portalAccount}」发起「${baseline.name}」售前基线测算 × 1 次（¥${price.toFixed(2)}/次）`, price);
+  if (!res.ok) { $('#wizard-error').textContent = res.msg; return; }
+  q.baseline.used += 1;
+  accSaveSellerLim(tenantId, portalAccount, q);
+  baseline.competitors=splitValues(baseline.competitors.join(',')).slice(0,3);
+  baselineTasks.unshift(baseline);
+  finishTask(baselineKey,baselineTasks);
+  toast(`售前基线测算已发起，从余额扣除 ¥${price.toFixed(2)}（剩余余额 ¥${res.balance.toFixed(2)}）`);
+}
+function showDiagnosisForm() {
+  wideModal('配置分析参数',`<form id="sales-diagnosis"><div class="sales-fields">
+    <div class="sales-two">
+      ${salesField('<span class="sales-number">1</span>公司名','company',{placeholder:'例如：某某科技有限公司'})}
+      ${salesField('<span class="sales-number">2</span>业务 / 产品名称','products',{placeholder:'例如：平台产品、运营服务',multi:true,hint:'可用回车或逗号分隔，最多 5 项。'})}
+      ${salesField('<span class="sales-number">3</span>品牌名称','brand',{placeholder:'仅填写 1 个对外推广使用的品牌'})}
+      ${salesField('<span class="sales-number">4</span>竞品名称','competitors',{placeholder:'例如：竞品 A、竞品 B、竞品 C',multi:true,hint:'请填写 3 个不同的竞品。'})}
+    </div>
+    <div class="sales-field"><span class="sales-label"><span class="sales-number">5</span>行业 ${must}</span>${industryFields()}</div>
+    ${choices('<span class="sales-number">6</span>报告模块 '+must,'module',reportSections,reportSections,'checkbox','整体表现')}
+    <p class="sales-hint">「整体表现」与附录「诊断证据」固定展示。</p>
+    ${choices('<span class="sales-number">7</span>分析模式 '+must,'mode',['快速分析','深度分析'],['快速分析'],'radio')}
+    ${choices('<span class="sales-number">8</span>AI 平台 '+must+' <small>至少 2 个，最多 6 个</small>','platform',aiPlatforms)}
+    </div><p id="diagnosis-error" class="sales-error" role="alert"></p>
+    <div class="sales-form-actions"><button type="button" data-sales-click="close">取消</button><button class="sales-violet">开始分析</button></div></form>`);
+}
+function submitDiagnosis(form) {
+  const v=new FormData(form);
+  const name=String(v.get('company')).trim();
+  const brands=splitValues(v.get('brand'));
+  const products=splitValues(v.get('products'));
+  const competitors=splitValues(v.get('competitors'));
+  const platforms=v.getAll('platform');
+  let error='';
+  if (!name || !products.length || products.length>5) error='请填写公司名称和 1–5 个产品。';
+  else if (brands.length!==1) error='请填写 1 个品牌名称。';
+  else if (competitors.length!==3) error='请填写 3 个不同的竞品。';
+  else if (platforms.length<2 || platforms.length>6) error='请选择 2–6 个 AI 平台。';
+  if (error) { $('#diagnosis-error').textContent=error;return; }
+  const q = accGetSellerQuota(tenantId, portalAccount);
+  if (q.diagnosis.used >= q.diagnosis.limit) { $('#diagnosis-error').textContent = '您本月售前报告次数已用完，请联系管理员在销售管理中调高上限。'; return; }
+  const price = accGetHqRates(tenantId).presales;
+  const res = accDeduct(tenantId, '售前报告', `销售「${portalAccount}」生成「${name}」售前诊断报告 × 1 份（¥${price.toFixed(2)}/份）`, price);
+  if (!res.ok) { $('#diagnosis-error').textContent = res.msg; return; }
+  q.diagnosis.used += 1;
+  accSaveSellerLim(tenantId, portalAccount, q);
+  reportTasks.unshift({name,brand:brands[0],products,competitors,platforms,mode:v.get('mode'),
+    industry:v.get('industry')+' / '+v.get('subIndustry'),modules:['整体表现',...v.getAll('module'),'诊断证据']});
+  finishTask(reportKey,reportTasks);
+  toast(`售前报告已生成，从余额扣除 ¥${price.toFixed(2)}（剩余余额 ¥${res.balance.toFixed(2)}）`);
+}
+function finishTask(key,tasks) {
+  const saved=save(key,tasks);
+  $('#dialog').close();
+  render();
+  toast(saved?'已保存配置，当前没有发起真实分析':'配置已添加到本次预览');
+}
+function showSavedTask(action,index) {
+  const isBaseline=action==='show-baseline';
+  const t=(isBaseline?baselineTasks:reportTasks)[index];
+  if (!t) return;
+  if (isBaseline) {
+    const totalChecks = t.words.length * t.platforms.length * Number(t.samples || 3);
+    const hitRate = t.name.includes('远山') ? '29.2%' : '18.5%';
+    const avgPos = t.name.includes('远山') ? '2.6' : '3.4';
+    wideModal(t.name+' · 售前基线测算报告', `
+      <div class="report-hero-banner">
+        <div>
+          <span class="badge blue">售前基线抽检 · ${esc(t.scope)}市场</span>
+          <h3>${esc(t.name)} — AI 搜索基线可见度测算</h3>
+          <p>监测词条 ${t.words.length} 个 · 覆盖 ${esc(t.platforms.join(' / '))} · 累计采样 ${totalChecks} 次</p>
+        </div>
+        <div class="report-score-box"><strong>${hitRate}</strong><small>当前首屏品牌提及率</small></div>
+      </div>
+      <div class="report-kpi-row">
+        <div class="report-kpi-card"><span>核心监测词</span><b>${t.words.length} 个</b><small>每词每平台 ${esc(t.samples)} 次抽检</small></div>
+        <div class="report-kpi-card"><span>当前平均顺位</span><b>第 ${avgPos} 位</b><small>存在较大前排提升空间</small></div>
+        <div class="report-kpi-card"><span>头部竞品提及率</span><b>64.0%</b><small>${esc(t.competitors[0]||'行业头部')}占据主导</small></div>
+        <div class="report-kpi-card"><span>建议签约版本</span><b>服务版</b><small>预计 4-6 周提升至 55%+</small></div>
+      </div>
+      <div class="report-card" style="margin-bottom:14px">
+        <h4><span>核心词抽检基线明细</span><span class="badge amber">待优化提升</span></h4>
+        ${table(['词条类型','抽检问题','豆包','DeepSeek','均值提及率','主要命中竞品'], t.words.map((w, idx)=>[
+          badge(w.type,'blue'), esc(w.text),
+          idx===0 ? badge('未命中','') : badge('第 2 位','green'),
+          idx%2===0 ? badge('第 3 位','blue') : badge('未命中',''),
+          ['16.7%','41.7%','25.0%','33.3%'][idx%4],
+          esc(t.competitors[idx % (t.competitors.length||1)] || '行业竞品')
+        ]))}
+      </div>
+      ${details([['品牌提及词',t.aliases],['测算指标',t.metrics.join('、')]])}
+    `);
+    return;
+  }
+  const rivals = t.competitors.length ? t.competitors : ['竞品 A','竞品 B','竞品 C'];
+  wideModal(t.brand+' · 售前 AI 诊断报告', `
+    <div class="report-hero-banner">
+      <div>
+        <span class="badge blue">${esc(t.mode)} · ${esc(t.industry)}</span>
+        <h3>${esc(t.name)}（${esc(t.brand)}）GEO 售前诊断报告</h3>
+        <p>核心业务：${esc(t.products.join('、'))} · 监测平台：${esc(t.platforms.join('、'))}</p>
+      </div>
+      <div class="report-score-box"><strong>58 分</strong><small>GEO 综合可见度指数</small></div>
+    </div>
+    <div class="report-kpi-row">
+      <div class="report-kpi-card"><span>本品提及率</span><b>24.6%</b><small>低于行业前排均值 48%</small></div>
+      <div class="report-kpi-card"><span>正面/中正舆情占比</span><b>96.5%</b><small>品牌基础口碑健康</small></div>
+      <div class="report-kpi-card"><span>高权重信源覆盖</span><b>31.0%</b><small>缺少权威科技/行业门户</small></div>
+      <div class="report-kpi-card"><span>高意图词缺口</span><b>14 组</b><small>选型对比类问题流失严重</small></div>
+    </div>
+    <div class="report-grid-two">
+      <div class="report-card">
+        <h4><span>本品 vs 竞品 AI 提及率对比</span><small class="muted">跨平台综合采样</small></h4>
+        <div class="rival-row"><div class="rival-meta"><b>${esc(t.brand)}（本品）</b><b style="color:var(--sales-violet)">24.6%</b></div><div class="rival-bar"><i style="width:24.6%"></i></div></div>
+        <div class="rival-row"><div class="rival-meta"><span>${esc(rivals[0]||'竞品 A')}</span><span>68.2%</span></div><div class="rival-bar muted-bar"><i style="width:68.2%"></i></div></div>
+        <div class="rival-row"><div class="rival-meta"><span>${esc(rivals[1]||'竞品 B')}</span><span>51.4%</span></div><div class="rival-bar muted-bar"><i style="width:51.4%"></i></div></div>
+        <div class="rival-row"><div class="rival-meta"><span>${esc(rivals[2]||'竞品 C')}</span><span>39.0%</span></div><div class="rival-bar muted-bar"><i style="width:39%"></i></div></div>
+      </div>
+      <div class="report-card">
+        <h4><span>核心信源缺口与打单建议</span><span class="badge green">可立即切入</span></h4>
+        <ul class="opp-list">
+          <li><b>1. 补齐“选型对比”结构化评测内容</b>用户在询问「${esc(t.products[0])}哪家好」时，AI 优先引用第三方横评，本品缺乏参数对比信源。</li>
+          <li><b>2. 投放高权重行业门户与百科信源</b>DeepSeek 与豆包对该行业引用前三是垂直科技门户（42%）、百家号（28%）、知乎专业回答（19%）。</li>
+          <li><b>3. 建立企业专属防串味知识底座</b>统一技术白皮书与标杆客户案例口径，提升大模型首段推荐采信度。</li>
+        </ul>
+      </div>
+    </div>
+    <div class="report-card">
+      <h4><span>分平台可见度诊断矩阵</span><small class="muted">已选模块：${esc(t.modules.join(' · '))}</small></h4>
+      ${table(['AI 搜索平台','品牌提及率','平均推荐顺位','高频引用信源类型','诊断结论'], t.platforms.map((p, i)=>[
+        `<b>${esc(p)}</b>`,
+        ['28.5%','22.0%','31.2%','19.4%','25.0%','21.8%'][i%6],
+        ['第 2.4 位','第 3.1 位','第 2.1 位','第 3.5 位','第 2.8 位','第 3.2 位'][i%6],
+        ['权威新闻门户 / 百家号','技术社区 / 行业白皮书','商业财经媒体 / 行业百科','知乎深度回答 / 测评','微信公众号 / 门户','百科 / 行业资讯'][i%6],
+        i%2===0 ? badge('重点突破平台','blue') : badge('需补充权威信源','amber')
+      ]))}
+    </div>
+  `);
+}
+const orderSettingsKey='geo-oem-sales-order-settings-'+portalAccount+tenantSuffix;
+const orderSettings=load(orderSettingsKey,{});
+const sampleOrderMeta={
+  'GEO-261107':{submitted:'2026-10-29 10:24',type:'新签',location:'苏州'},
+  'GEO-261098':{submitted:'2026-10-12 15:08',type:'新签',location:'佛山'},
+  'GEO-261070':{submitted:'2026-07-28 09:45',type:'新签',location:'苏州'},
+  'GEO-261091':{submitted:'2026-09-29 14:02',type:'新签',location:'宁波'}
+};
+const filtersForSales={
+  orderState:['订单状态',o=>o.orderState||(orderVersion(o.package)==='工具版'?'客户自助使用':(o.owner?'已分配优化师':'待分配优化师'))],
+  service:['服务状态',o=>o.service],
+  entity:['交付方式',o=>orderVersion(o.package)==='工具版'?'工具版自助':(o.owner?'服务版 · '+o.owner:'服务版待派单')],
+  version:['订单版本',o=>orderVersion(o.package)],
+  account:['账号',o=>o.account||o.customer],
+  orderType:['订单类型',o=>o.orderType||sampleOrderMeta[o.id]?.type||'新签'],
+  business:['业务类型',o=>o.business||'国内']
+};
+let salesOrderQuery={};
+const openSalesCustomers=new Set(data.orders.slice(0,2).map(o=>o.customer));
+function followOrdersPage() {
+  return heading('销售跟进订单','')+
+    `<form id="sales-order-query"><div class="sales-order-filters">${Object.entries(filtersForSales).map(([key,[label,read]])=>
+      `<select name="${key}" aria-label="${label}">${optionList([...new Set(data.orders.map(read))],salesOrderQuery[key],'全部'+label)}</select>`).join('')}</div>
+      <div class="sales-order-search"><input name="term" type="search" value="${esc(salesOrderQuery.term)}" placeholder="搜索公司名称、订单 ID 或订单备注" aria-label="搜索订单">
+        <button class="primary">查询订单</button><button type="button" data-sales-click="reset-filters">重置</button></div></form>
+    <section class="panel" id="follow-order-results">${followOrderGroups()}</section>`;
+}
+function followOrderGroups() {
+  const term=(salesOrderQuery.term||'').toLowerCase();
+  const filtering=Object.values(salesOrderQuery).some(Boolean);
+  const orders=data.orders.filter(o=>[o.customer,o.id,o.note].some(v=>String(v||'').toLowerCase().includes(term)) &&
+    Object.entries(filtersForSales).every(([key,[,read]])=>!salesOrderQuery[key]||read(o)===salesOrderQuery[key]));
+  const byCustomer=Map.groupBy(orders,o=>o.customer);
+  const grouped = [...byCustomer].map(([name,list])=>{
+    const total=data.orders.filter(o=>o.customer===name).length;
+    return `<details class="customer-group sales-order-group" data-sales-customer="${esc(name)}" ${filtering||openSalesCustomers.has(name)?'open':''}>
+      <summary><strong>${esc(name)}</strong><span>${badge(list[0].industry)}</span><b>${list.length===total?total:list.length+' / '+total}</b></summary>
+      <div class="customer-orders">${followTable(list)}</div></details>`;
+  }).join('');
+  return '<div class="sales-order-head"><span>客户企业</span><span>行业</span><span>订单总数</span></div>'+
+    (grouped || '<div class="empty">没有符合条件的客户或订单</div>')+
+    `<div class="table-foot">共 ${byCustomer.size} 个客户 · ${orders.length} 笔跟单订单</div>`;
+}
+const CUST_PWD_KEY = 'geo-oem-cust-pwd-state-v1-' + tenantId;
+const SEEDED_APPLIED_PWD_ORDERS = new Set(['GEO-261107','GEO-261104','GEO-261098','GEO-261082','GEO-261075','GEO-261070','GEO-261092','GEO-261091','GEO-261086']);
+let _activeOtpClip = '';
+
+function getOrderAccount(o) {
+  if (!o) return 'geo_demo';
+  if (o.loginAccount) return o.loginAccount;
+  const digits = String(o.id || '261100').replace(/\D/g, '') || '261100';
+  return 'geo_' + digits;
+}
+
+function getCustPwdState(o) {
+  const account = getOrderAccount(o);
+  const map = load(CUST_PWD_KEY, {});
+  if (o && map[o.id]) return { account, ...map[o.id] };
+  const seeded = o && SEEDED_APPLIED_PWD_ORDERS.has(o.id);
+  return {
+    account,
+    applied: Boolean(seeded),
+    appliedAt: seeded ? ((o.start || demoDay) + ' 10:30') : '',
+    appliedBy: seeded ? (o.sales || portalAccount || '跟单销售') : '',
+    resetCount: 0,
+    lastResetAt: ''
+  };
+}
+
+function genStrongOneTimePass() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+  let tail = '';
+  for (let i = 0; i < 6; i++) tail += chars[Math.floor(Math.random() * chars.length)];
+  return 'Geo#' + tail;
+}
+
+function markCustPwdIssued(o, isReset = false) {
+  const map = load(CUST_PWD_KEY, {});
+  const prev = getCustPwdState(o);
+  const now = accNow();
+  // 严禁在 localStorage 或订单对象中持久化任何密码明文
+  map[o.id] = {
+    account: prev.account,
+    applied: true,
+    appliedAt: prev.appliedAt || now,
+    appliedBy: prev.appliedBy || portalAccount || o.sales || '跟单销售',
+    resetCount: isReset ? (Number(prev.resetCount || 0) + 1) : Number(prev.resetCount || 0),
+    lastResetAt: isReset ? now : (prev.lastResetAt || '')
+  };
+  save(CUST_PWD_KEY, map);
+  return map[o.id];
+}
+
+function showOneTimePwdModal(o, account, oneTimePass, isReset = false) {
+  _activeOtpClip = `客户企业：${o.customer}\n订单编号：${o.id}\n登录账号：${account}\n登录密码：${oneTimePass}\n（请妥善保存，密码仅展示一次）`;
+  const title = isReset ? `新客户密码已生成 · 仅展示一次` : `客户初始密码已申请 · 仅展示一次`;
+  modal(title, `
+    <div class="otp-warn-banner">
+      <span style="font-size:18px;line-height:1.2">⚠</span>
+      <div>
+        <b>请立即复制并保存给客户！</b><br>
+        此密码<b>仅在当前弹窗展示这一次</b>，关闭弹窗后系统<b>不保存明文且无法再次查看</b>；后续如遗忘，仅支持通过销售后台「重置密码」重新生成。
+      </div>
+    </div>
+    <div class="otp-cred-card">
+      <div class="otp-cred-row"><span>客户企业 / 订单号</span><b>${esc(o.customer)}（${esc(o.id)}）</b></div>
+      <div class="otp-cred-row"><span>客户登录账号</span><code>${esc(account)}</code></div>
+      <div class="otp-pass-box">
+        <div>
+          <small class="muted" style="display:block;font-size:11.5px;margin-bottom:2px">${isReset ? '重置后新密码（原密码已失效）' : '本次申请的初始密码'}</small>
+          <span class="otp-pass-code">${esc(oneTimePass)}</span>
+        </div>
+        <span class="otp-once-tag">仅展示一次</span>
+      </div>
+    </div>
+    <div class="sales-form-actions">
+      <button type="button" data-sales-click="order-copy-otp">一键复制账号与密码</button>
+      <button type="button" class="primary" data-sales-click="order-close-otp">我已保存，关闭弹窗</button>
+    </div>
+  `);
+}
+
+$('#dialog')?.addEventListener('close', () => {
+  _activeOtpClip = '';
+});
+
+function followTable(list) {
+  return table(['订单 ID / 版本','跟单销售','优化师','状态','订单备注','续费','榜单','有效期','操作'],list.map(o=>{
+    const config=orderSettings[o.id]||{};
+    const svc = orderVersion(o.package)==='服务版';
+    const remaining=Math.round((Date.parse(o.end)-Date.parse(demoDay))/86400000);
+    const ownerCell = svc ? (o.owner ? `<b>${esc(o.owner)}</b>` : badge('待分配优化师','amber')) : '<span class="muted">客户自助</span>';
+    const pwdSt = getCustPwdState(o);
+    const pwdBtn = pwdSt.applied
+      ? orderTool('order-reset','重置密码',o.id,'原密码不可查看；点击重置并一次性展示新密码')
+      : orderTool('order-apply-pwd','申请密码',o.id,'申请客户初始登录密码（弹窗仅展示一次）');
+    return [
+      btn('order',esc(o.id),o.id)+`<br>${badge(orderVersion(o.package), svc?'blue':'green')}`,
+      `<b>${esc(o.sales)}</b>`,
+      ownerCell,
+      tag(o.service),
+      esc(o.note||'—'),
+      badge(o.renewal==='已续费'?'已续费':'未续费',o.renewal==='已续费'?'green':'amber'),
+      tag(o.rank),
+      `<small>${esc(o.start)}<br>至 ${esc(o.end)}</small><br>${remaining<0?badge('已到期'):badge('剩 '+remaining+' 天',remaining<=30?'red':'')}`,
+      `<div class="sales-order-actions">${btn('order','详情',o.id)}${pwdBtn}${preview(o,true)}</div>`
+    ];
+  }));
+}
+function orderTool(action,label,id,hint='') {
+  const cls = action==='order-reset' ? 'reset-order' : (action==='order-apply-pwd' ? 'apply-pwd' : '');
+  return `<button class="${cls}" data-sales-click="${action}" data-id="${esc(id)}" title="${esc(hint)}">${label}</button>`;
+}
+document.addEventListener('toggle',event=>{
+  const details=event.target;
+  if (!details.matches('details[data-sales-customer]')||!details.isConnected||Object.values(salesOrderQuery).some(Boolean)) return;
+  if (details.open) openSalesCustomers.add(details.dataset.salesCustomer);
+  else openSalesCustomers.delete(details.dataset.salesCustomer);
+},true);
+function salesOrderClick(button) {
+  const action=button.dataset.salesClick;
+  if (action==='reset-filters') { salesOrderQuery={};render();return; }
+  if (action==='order-copy-otp') {
+    if (_activeOtpClip) {
+      navigator.clipboard?.writeText(_activeOtpClip).catch(()=>{});
+      toast('已复制客户登录账号与一次性密码，请及时发给客户保存');
+    }
+    return;
+  }
+  if (action==='order-close-otp') {
+    _activeOtpClip = '';
+    $('#dialog').close();
+    toast('一次性密码弹窗已关闭，系统未保存明文；后续如需找回请点击「重置密码」');
+    return;
+  }
+  const o=data.orders.find(order=>order.id===button.dataset.id);
+  if (!o) return;
+  if (action==='order-apply-pwd') {
+    const oneTimePass = genStrongOneTimePass();
+    const st = markCustPwdIssued(o, false);
+    if ($('#dialog').open) $('#dialog').close();
+    render();
+    showOneTimePwdModal(o, st.account, oneTimePass, false);
+    return;
+  }
+  if (action==='order-reset') {
+    const st = getCustPwdState(o);
+    modal('重置客户密码 · '+o.customer,`<form id="sales-order-reset" data-id="${esc(o.id)}">
+      <div class="otp-warn-banner" style="margin-bottom:12px">
+        <span style="font-size:16px">⚠</span>
+        <div>确认重置订单 <b>${esc(o.id)}</b>（登录账号 <code>${esc(st.account)}</code>）的客户登录密码？<br>重置后<b>原密码将立即失效</b>，新密码将通过一次性弹窗<b>仅展示一次</b>（系统不存明文）。</div>
+      </div>
+      <div class="sales-form-actions"><button type="button" data-sales-click="close">取消</button><button class="reset-order">确认重置并生成新密码</button></div></form>`);
+  }
+}
+function handleOrderForm(form) {
+  const values=Object.fromEntries(new FormData(form));
+  if (form.id==='sales-order-query') {
+    salesOrderQuery={...values,term:values.term.trim()};
+    $('#follow-order-results').innerHTML=followOrderGroups();
+    return;
+  }
+  const o = data.orders.find(x=>x.id===form.dataset.id);
+  if (!o) return;
+  const id=form.dataset.id;
+  const settings=orderSettings[id]||{};
+  if (form.id==='sales-order-reset') {
+    const oneTimePass = genStrongOneTimePass();
+    const st = markCustPwdIssued(o, true);
+    settings.resetDemoAt = new Date().toISOString();
+    delete settings.loginPass;
+    orderSettings[id] = settings;
+    save(orderSettingsKey, orderSettings);
+    $('#dialog').close();
+    render();
+    showOneTimePwdModal(o, st.account, oneTimePass, true);
+    return;
+  }
+  orderSettings[id]=settings;
+  const saved=save(orderSettingsKey,orderSettings);
+  $('#dialog').close();
+  render();
+  toast(saved?'订单设置已保存在当前浏览器':'订单设置已更新本次预览');
+}
+
+render();
+
+</script>
+<script src="./sales-pro.js"></script>
+</body>
+</html>

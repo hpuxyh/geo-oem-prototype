@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>服务版 · 优化师端</title>
+</head>
+<body>
+<script>
+const p = new URLSearchParams(location.search);
+p.set('svcRole', 'optimizer');
+location.replace('./client.html?' + p.toString() + (location.hash || '#report'));
+</script>
+</body>
+</html>
